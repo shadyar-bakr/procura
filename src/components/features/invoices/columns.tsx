@@ -74,6 +74,12 @@ export const getColumns = (
     },
   },
   {
+    accessorKey: "currency",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Currency" />
+    ),
+  },
+  {
     accessorKey: "discount_amount",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Discount" />
@@ -82,6 +88,36 @@ export const getColumns = (
       const discount = parseFloat(row.getValue("discount_amount") || "0");
       return <div className="font-medium">{formatCurrency(discount)}</div>;
     },
+  },
+  {
+    accessorKey: "total_after_discount",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total After Discount" />
+    ),
+    cell: ({ row }) => {
+      const amount = parseFloat(String(row.original.amount ?? 0));
+      const discount = parseFloat(String(row.original.discount_amount ?? 0));
+      const tax = parseFloat(String(row.original.tax_amount ?? 0));
+      const total = amount - discount + tax;
+      return <div className="font-medium">{formatCurrency(total)}</div>;
+    },
+  },
+
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+  },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ row }) =>
+      row.original.created_at
+        ? format(new Date(row.original.created_at), "PPP")
+        : "N/A",
   },
   {
     accessorKey: "issue_date",
@@ -101,28 +137,6 @@ export const getColumns = (
     cell: ({ row }) =>
       row.original.due_date
         ? format(new Date(row.original.due_date), "PPP")
-        : "N/A",
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-  },
-  {
-    accessorKey: "currency",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Currency" />
-    ),
-  },
-  {
-    accessorKey: "created_at",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created At" />
-    ),
-    cell: ({ row }) =>
-      row.original.created_at
-        ? format(new Date(row.original.created_at), "PPP")
         : "N/A",
   },
   {

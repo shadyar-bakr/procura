@@ -163,7 +163,13 @@ export function InvoicesClient({
         handleDeleteInvoice,
         handlePayInvoice
       ),
-    [suppliers, departments, handleEditInvoice, handleDeleteInvoice]
+    [
+      suppliers,
+      departments,
+      handleEditInvoice,
+      handleDeleteInvoice,
+      handlePayInvoice,
+    ]
   );
 
   return (
@@ -180,8 +186,7 @@ export function InvoicesClient({
           filterColumnPlaceholder="Filter by invoice number..."
           onDeleteSelected={handleDeleteSelectedInvoices}
           initialColumnVisibility={{
-            supplier: false,
-            department: false,
+            created_at: false,
           }}
           emptyState={
             <EmptyState

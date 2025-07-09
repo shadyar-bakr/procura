@@ -18,7 +18,6 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FormModal } from "@/components/shared/form-modal";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { InvoiceForm } from "../invoices/invoice-form";
 
 interface DepartmentsClientProps {
   initialDepartments: Department[];

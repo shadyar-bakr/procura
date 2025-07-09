@@ -15,11 +15,19 @@ export const supplierSchema = z.object({
   contact_person: z.string().nullable().optional(),
   email: z
     .string()
-    .email("Invalid email format")
+    .email("Please enter a valid email address.")
     .nullable()
     .optional()
     .or(z.literal("")),
-  phone: z.string().nullable().optional(),
+  phone: z
+    .string()
+    .regex(
+      /^07\d{9}$/,
+      "Please enter a valid Iraqi phone number (e.g., 07XXXXXXXXX)."
+    )
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   tax_id: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   created_at: z.date().nullable().optional(),
