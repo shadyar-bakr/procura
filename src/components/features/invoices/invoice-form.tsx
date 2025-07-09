@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -22,19 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { DatePicker } from "@/components/ui/date-picker";
 import { EnrichedInvoice, Supplier, Department } from "@/types";
-import { invoiceFormSchema } from "@/types/schemas";
+import { invoiceSchema } from "@/types/schemas";
 
-export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
+export type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 
 interface InvoiceFormProps {
   invoice?: EnrichedInvoice | null;
@@ -51,38 +42,28 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const isEditMode = !!invoice;
 
-  const form = useForm<InvoiceFormValues>({
-    resolver: zodResolver(invoiceFormSchema),
-    defaultValues: {
-      invoice_number: "",
-      amount: 0,
-      discount_amount: 0,
-      tax_amount: 0,
-      currency: "USD",
-      status: "pending",
-      notes: "",
-    },
-  });
+  const defaultValues: InvoiceFormValues = {
+    invoice_number: invoice?.invoice_number || "",
+    amount: invoice?.amount || 0,
+    discount_amount: invoice?.discount_amount ?? null,
+    tax_amount: invoice?.tax_amount ?? null,
+    currency: invoice?.currency ?? "USD",
+    status: (invoice?.status as any) ?? "unpaid",
+    notes: invoice?.notes ?? null,
+    supplier_id: invoice?.supplier_id ?? null,
+    department_id: invoice?.department_id ?? null,
+    issue_date: invoice?.issue_date ? new Date(invoice.issue_date) : new Date(),
+    due_date: invoice?.due_date ? new Date(invoice.due_date) : new Date(),
+    payment_date: invoice?.payment_date ? new Date(invoice.payment_date) : null,
+    id: invoice?.id,
+    created_at: invoice?.created_at ? new Date(invoice.created_at) : null,
+    updated_at: invoice?.updated_at ? new Date(invoice.updated_at) : null,
+  };
 
-  useEffect(() => {
-    if (invoice) {
-      form.reset({
-        ...invoice,
-        discount_amount: invoice.discount_amount ?? undefined,
-        tax_amount: invoice.tax_amount ?? undefined,
-        currency: invoice.currency ?? undefined,
-        status: invoice.status ?? undefined,
-        notes: invoice.notes ?? undefined,
-        supplier_id: invoice.supplier_id ?? undefined,
-        department_id: invoice.department_id ?? undefined,
-        issue_date: new Date(invoice.issue_date),
-        due_date: new Date(invoice.due_date),
-        payment_date: invoice.payment_date
-          ? new Date(invoice.payment_date)
-          : undefined,
-      });
-    }
-  }, [invoice, form]);
+  const form = useForm<InvoiceFormValues>({
+    resolver: zodResolver(invoiceSchema),
+    defaultValues,
+  });
 
   return (
     <Form {...form}>
@@ -163,6 +144,32 @@ export function InvoiceForm({
           />
           <FormField
             control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value ?? undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="unpaid">Unpaid</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="partial">Partial</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
@@ -180,33 +187,11 @@ export function InvoiceForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Issue Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  date={field.value}
+                  setDate={field.onChange}
+                  disabled={(date) => date > new Date()}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -217,33 +202,11 @@ export function InvoiceForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Due Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  date={field.value}
+                  setDate={field.onChange}
+                  disabled={(date) => date < new Date()}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -259,6 +222,7 @@ export function InvoiceForm({
                 <Input
                   placeholder="Optional notes about the invoice"
                   {...field}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />

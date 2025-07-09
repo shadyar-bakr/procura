@@ -143,6 +143,7 @@ export const getColumns = (
       const payAction =
         invoice.status !== "paid" ? (
           <FormModal<PayInvoiceFormValues>
+            key={`pay-modal-${invoice.id}`}
             title="Pay Invoice"
             description="Select a payment date for the invoice."
             onFormSubmit={(formData) => onPay(invoice.id.toString(), formData)}

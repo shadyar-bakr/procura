@@ -6,10 +6,16 @@ import {
   updateDepartment,
   deleteDepartment,
 } from "@/lib/data/departments";
-import { ActionResponse } from "@/types";
+import {
+  ActionResponse,
+  Department,
+  DepartmentInsert,
+  DepartmentUpdate,
+} from "@/types";
 import { handleActionError } from "@/lib/action-handler";
-import { Department } from "@/types/index";
 import { departmentSchema } from "@/types/schemas";
+
+const updateDepartmentSchema = departmentSchema.partial();
 
 export async function createDepartmentAction(
   formData: FormData
@@ -26,8 +32,14 @@ export async function createDepartmentAction(
     };
   }
 
+  // Only pass DB fields
+  const insertData: DepartmentInsert = {
+    name: validatedFields.data.name,
+    description: validatedFields.data.description ?? null,
+  };
+
   try {
-    const data = await createDepartment(validatedFields.data);
+    const data = await createDepartment(insertData);
     revalidatePath("/departments");
     return {
       success: true,
@@ -43,7 +55,7 @@ export async function updateDepartmentAction(
   id: number,
   formData: FormData
 ): Promise<ActionResponse<Department>> {
-  const validatedFields = departmentSchema.safeParse(
+  const validatedFields = updateDepartmentSchema.safeParse(
     Object.fromEntries(formData.entries())
   );
 
@@ -55,8 +67,14 @@ export async function updateDepartmentAction(
     };
   }
 
+  // Only pass DB fields
+  const updateData: DepartmentUpdate = {
+    name: validatedFields.data.name,
+    description: validatedFields.data.description ?? null,
+  };
+
   try {
-    const data = await updateDepartment(id, validatedFields.data);
+    const data = await updateDepartment(id, updateData);
     revalidatePath("/departments");
     return {
       success: true,

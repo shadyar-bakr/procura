@@ -6,9 +6,16 @@ import {
   updateSupplier,
   deleteSupplier,
 } from "@/lib/data/suppliers";
-import { ActionResponse, Supplier } from "@/types";
+import {
+  ActionResponse,
+  Supplier,
+  SupplierInsert,
+  SupplierUpdate,
+} from "@/types";
 import { handleActionError } from "@/lib/action-handler";
 import { supplierSchema } from "@/types/schemas";
+
+const updateSupplierSchema = supplierSchema.partial();
 
 export async function createSupplierAction(
   formData: FormData
@@ -26,7 +33,18 @@ export async function createSupplierAction(
       };
     }
 
-    const data = await createSupplier(parsed.data);
+    // Only pass DB fields
+    const insertData: SupplierInsert = {
+      name: parsed.data.name,
+      address: parsed.data.address ?? null,
+      contact_person: parsed.data.contact_person ?? null,
+      email: parsed.data.email ?? null,
+      phone: parsed.data.phone ?? null,
+      tax_id: parsed.data.tax_id ?? null,
+      notes: parsed.data.notes ?? null,
+    };
+
+    const data = await createSupplier(insertData);
     revalidatePath("/suppliers");
 
     return {
@@ -38,8 +56,6 @@ export async function createSupplierAction(
     return handleActionError<Supplier>(error, "Failed to create supplier.");
   }
 }
-
-const updateSupplierSchema = supplierSchema.partial();
 
 export async function updateSupplierAction(
   id: number,
@@ -58,7 +74,18 @@ export async function updateSupplierAction(
       };
     }
 
-    const data = await updateSupplier(id, parsed.data);
+    // Only pass DB fields
+    const updateData: SupplierUpdate = {
+      name: parsed.data.name,
+      address: parsed.data.address ?? null,
+      contact_person: parsed.data.contact_person ?? null,
+      email: parsed.data.email ?? null,
+      phone: parsed.data.phone ?? null,
+      tax_id: parsed.data.tax_id ?? null,
+      notes: parsed.data.notes ?? null,
+    };
+
+    const data = await updateSupplier(id, updateData);
     revalidatePath("/suppliers");
 
     return {

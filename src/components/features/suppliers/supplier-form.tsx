@@ -32,12 +32,15 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
     resolver: zodResolver(supplierSchema),
     defaultValues: {
       name: "",
-      address: "",
-      contact_person: "",
-      phone: "",
-      email: "",
-      tax_id: "",
-      notes: "",
+      address: null,
+      contact_person: null,
+      phone: null,
+      email: null,
+      tax_id: null,
+      notes: null,
+      id: supplier?.id,
+      created_at: supplier?.created_at ? new Date(supplier.created_at) : null,
+      updated_at: supplier?.updated_at ? new Date(supplier.updated_at) : null,
     },
   });
 
@@ -45,22 +48,28 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
     if (supplier) {
       form.reset({
         name: supplier.name,
-        address: supplier.address || "",
-        contact_person: supplier.contact_person || "",
-        phone: supplier.phone || "",
-        email: supplier.email || "",
-        tax_id: supplier.tax_id || "",
-        notes: supplier.notes || "",
+        address: supplier.address ?? null,
+        contact_person: supplier.contact_person ?? null,
+        phone: supplier.phone ?? null,
+        email: supplier.email ?? null,
+        tax_id: supplier.tax_id ?? null,
+        notes: supplier.notes ?? null,
+        id: supplier.id,
+        created_at: supplier.created_at ? new Date(supplier.created_at) : null,
+        updated_at: supplier.updated_at ? new Date(supplier.updated_at) : null,
       });
     } else {
       form.reset({
         name: "",
-        address: "",
-        contact_person: "",
-        phone: "",
-        email: "",
-        tax_id: "",
-        notes: "",
+        address: null,
+        contact_person: null,
+        phone: null,
+        email: null,
+        tax_id: null,
+        notes: null,
+        id: undefined,
+        created_at: null,
+        updated_at: null,
       });
     }
   }, [supplier, form]);
@@ -88,7 +97,7 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,7 +110,7 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Contact Person</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,7 +123,7 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,7 +136,20 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tax_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tax ID</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,7 +162,7 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

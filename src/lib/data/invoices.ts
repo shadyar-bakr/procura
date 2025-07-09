@@ -58,7 +58,11 @@ export async function createInvoice(invoice: InvoiceInsert): Promise<Invoice> {
 
   const { data, error } = await supabase
     .from("invoices")
-    .insert(invoice)
+    .insert({
+      ...invoice,
+      status: "unpaid",
+      payment_date: null,
+    })
     .select()
     .single();
 

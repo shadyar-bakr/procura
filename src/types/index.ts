@@ -1,4 +1,4 @@
-import { Tables } from "./database.types";
+import { Tables, TablesInsert, TablesUpdate } from "./database.types";
 
 // Base types from Supabase
 export type Department = Tables<"departments">;
@@ -11,66 +11,13 @@ export type EnrichedInvoice = Invoice & {
   department?: Department | null;
 };
 
-// Insert and Update types for forms
-export type DepartmentInsert = {
-  name: string;
-  description?: string;
-};
-
-export type DepartmentUpdate = {
-  name?: string;
-  description?: string;
-};
-
-export type SupplierInsert = {
-  name: string;
-  address?: string;
-  contact_person?: string;
-  email?: string;
-  phone?: string;
-  tax_id?: string;
-  notes?: string;
-};
-
-export type SupplierUpdate = {
-  name?: string;
-  address?: string;
-  contact_person?: string;
-  email?: string;
-  phone?: string;
-  tax_id?: string;
-  notes?: string;
-};
-
-export type InvoiceInsert = {
-  invoice_number: string;
-  amount: number;
-  discount_amount?: number;
-  tax_amount?: number;
-  currency?: string;
-  status?: string;
-  issue_date: string;
-  due_date: string;
-  payment_date?: string;
-  notes?: string;
-  supplier_id?: number;
-  department_id?: number;
-};
-
-export type InvoiceUpdate = {
-  invoice_number?: string;
-  amount?: number;
-  discount_amount?: number;
-  tax_amount?: number;
-  currency?: string;
-  status?: string;
-  issue_date?: string;
-  due_date?: string;
-  payment_date?: string;
-  notes?: string;
-  supplier_id?: number;
-  department_id?: number;
-};
+// Use DB-generated types for inserts/updates
+export type DepartmentInsert = TablesInsert<"departments">;
+export type DepartmentUpdate = TablesUpdate<"departments">;
+export type SupplierInsert = TablesInsert<"suppliers">;
+export type SupplierUpdate = TablesUpdate<"suppliers">;
+export type InvoiceInsert = TablesInsert<"invoices">;
+export type InvoiceUpdate = TablesUpdate<"invoices">;
 
 // Dashboard specific types
 export type DashboardMetrics = {

@@ -7,9 +7,11 @@ import {
   deleteInvoice,
   payInvoice,
 } from "@/lib/data/invoices";
-import { ActionResponse, Invoice } from "@/types";
+import { ActionResponse, Invoice, InvoiceInsert, InvoiceUpdate } from "@/types";
 import { handleActionError } from "@/lib/action-handler";
 import { invoiceSchema } from "@/types/schemas";
+
+const updateInvoiceSchema = invoiceSchema.partial();
 
 export async function createInvoiceAction(
   formData: FormData
@@ -27,7 +29,33 @@ export async function createInvoiceAction(
       };
     }
 
-    const data = await createInvoice(parsed.data);
+    // Only pass DB fields
+    const insertData: InvoiceInsert = {
+      invoice_number: parsed.data.invoice_number,
+      amount: parsed.data.amount,
+      discount_amount: parsed.data.discount_amount ?? null,
+      tax_amount: parsed.data.tax_amount ?? null,
+      currency: parsed.data.currency ?? null,
+      status: parsed.data.status ?? null,
+      issue_date:
+        parsed.data.issue_date instanceof Date
+          ? parsed.data.issue_date.toISOString()
+          : parsed.data.issue_date,
+      due_date:
+        parsed.data.due_date instanceof Date
+          ? parsed.data.due_date.toISOString()
+          : parsed.data.due_date,
+      payment_date: parsed.data.payment_date
+        ? parsed.data.payment_date instanceof Date
+          ? parsed.data.payment_date.toISOString()
+          : parsed.data.payment_date
+        : null,
+      notes: parsed.data.notes ?? null,
+      supplier_id: parsed.data.supplier_id ?? null,
+      department_id: parsed.data.department_id ?? null,
+    };
+
+    const data = await createInvoice(insertData);
     revalidatePath("/invoices");
     revalidatePath("/"); // Revalidate dashboard
 
@@ -40,8 +68,6 @@ export async function createInvoiceAction(
     return handleActionError<Invoice>(error, "Failed to create invoice.");
   }
 }
-
-const updateInvoiceSchema = invoiceSchema.partial();
 
 export async function updateInvoiceAction(
   id: number,
@@ -60,7 +86,35 @@ export async function updateInvoiceAction(
       };
     }
 
-    const data = await updateInvoice(id, parsed.data);
+    // Only pass DB fields
+    const updateData: InvoiceUpdate = {
+      invoice_number: parsed.data.invoice_number,
+      amount: parsed.data.amount,
+      discount_amount: parsed.data.discount_amount ?? null,
+      tax_amount: parsed.data.tax_amount ?? null,
+      currency: parsed.data.currency ?? null,
+      status: parsed.data.status ?? null,
+      issue_date: parsed.data.issue_date
+        ? parsed.data.issue_date instanceof Date
+          ? parsed.data.issue_date.toISOString()
+          : parsed.data.issue_date
+        : undefined,
+      due_date: parsed.data.due_date
+        ? parsed.data.due_date instanceof Date
+          ? parsed.data.due_date.toISOString()
+          : parsed.data.due_date
+        : undefined,
+      payment_date: parsed.data.payment_date
+        ? parsed.data.payment_date instanceof Date
+          ? parsed.data.payment_date.toISOString()
+          : parsed.data.payment_date
+        : undefined,
+      notes: parsed.data.notes ?? null,
+      supplier_id: parsed.data.supplier_id ?? null,
+      department_id: parsed.data.department_id ?? null,
+    };
+
+    const data = await updateInvoice(id, updateData);
     revalidatePath("/invoices");
     revalidatePath("/"); // Revalidate dashboard
 
