@@ -47,9 +47,8 @@ export async function createSupplier(
 
   if (error) {
     console.error("Error creating supplier:", error);
-    throw error;
+    throw new Error("Failed to create supplier");
   }
-
   return data;
 }
 
@@ -68,9 +67,8 @@ export async function updateSupplier(
 
   if (error) {
     console.error("Error updating supplier:", error);
-    throw error;
+    throw new Error("Failed to update supplier");
   }
-
   return data;
 }
 
@@ -81,6 +79,17 @@ export async function deleteSupplier(id: number): Promise<void> {
 
   if (error) {
     console.error("Error deleting supplier:", error);
-    throw error;
+    throw new Error("Failed to delete supplier");
+  }
+}
+
+export async function deleteSuppliers(ids: number[]): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("suppliers").delete().in("id", ids);
+
+  if (error) {
+    console.error("Error deleting suppliers:", error);
+    throw new Error("Failed to delete suppliers");
   }
 }

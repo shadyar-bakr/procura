@@ -1,9 +1,22 @@
+import { z } from "zod";
+import {
+  departmentSchema,
+  invoiceSchema,
+  payInvoiceSchema,
+  supplierSchema,
+} from "./schemas";
 import { Tables, TablesInsert, TablesUpdate } from "./database.types";
 
 // Base types from Supabase
 export type Department = Tables<"departments">;
 export type Supplier = Tables<"suppliers">;
 export type Invoice = Tables<"invoices">;
+
+// Form value types from Zod schemas
+export type DepartmentFormValues = z.infer<typeof departmentSchema>;
+export type SupplierFormValues = z.infer<typeof supplierSchema>;
+export type InvoiceFormValues = z.infer<typeof invoiceSchema>;
+export type PayInvoiceFormValues = z.infer<typeof payInvoiceSchema>;
 
 // Enhanced types with relationships
 export type EnrichedInvoice = Invoice & {

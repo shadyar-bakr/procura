@@ -1,21 +1,28 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Department, EnrichedInvoice, Supplier } from "@/types/index";
+import {
+  Department,
+  EnrichedInvoice,
+  InvoiceUpdate,
+  Supplier,
+  PayInvoiceFormValues,
+} from "@/types/index";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { InvoiceForm, InvoiceFormValues } from "../invoices/invoice-form";
+import { InvoiceForm } from "../invoices/invoice-form";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 import { GenericCellAction } from "@/components/shared/cell-action";
 import { FormModal } from "@/components/shared/form-modal";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { PayInvoiceForm, PayInvoiceFormValues } from "./pay-invoice-form";
+import { PayInvoiceForm } from "./pay-invoice-form";
+import { Badge } from "@/components/ui/badge";
 
 export const getColumns = (
   suppliers: Supplier[],
   departments: Department[],
-  onEdit: (id: string, data: InvoiceFormValues) => void,
+  onEdit: (id: string, data: InvoiceUpdate) => void,
   onDelete: (id: string) => void,
   onPay: (id: string, data: PayInvoiceFormValues) => void
 ): ColumnDef<EnrichedInvoice>[] => [
@@ -70,14 +77,13 @@ export const getColumns = (
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
-      return <div className="font-medium">{formatCurrency(amount)}</div>;
+      const currency = row.original.currency;
+      return (
+        <div className="font-medium">
+          {formatCurrency(amount, currency === "USD" ? "USD" : "IQD")}
+        </div>
+      );
     },
-  },
-  {
-    accessorKey: "currency",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Currency" />
-    ),
   },
   {
     accessorKey: "discount_amount",
@@ -86,7 +92,12 @@ export const getColumns = (
     ),
     cell: ({ row }) => {
       const discount = parseFloat(row.getValue("discount_amount") || "0");
-      return <div className="font-medium">{formatCurrency(discount)}</div>;
+      const currency = row.original.currency;
+      return (
+        <div className="font-medium">
+          {formatCurrency(discount, currency === "USD" ? "USD" : "IQD")}
+        </div>
+      );
     },
   },
   {
@@ -99,7 +110,12 @@ export const getColumns = (
       const discount = parseFloat(String(row.original.discount_amount ?? 0));
       const tax = parseFloat(String(row.original.tax_amount ?? 0));
       const total = amount - discount + tax;
-      return <div className="font-medium">{formatCurrency(total)}</div>;
+      const currency = row.original.currency;
+      return (
+        <div className="font-medium">
+          {formatCurrency(total, currency === "USD" ? "USD" : "IQD")}
+        </div>
+      );
     },
   },
 
@@ -108,6 +124,38 @@ export const getColumns = (
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
+    cell: ({ row }) => {
+      const status = row.original.status;
+      if (status === "paid") {
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Paid
+          </Badge>
+        );
+      }
+      if (status === "unpaid") {
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Unpaid
+          </Badge>
+        );
+      }
+      if (status === "partial") {
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            Partial
+          </Badge>
+        );
+      }
+      if (status === "cancelled") {
+        return (
+          <Badge className="bg-gray-200 text-gray-700 border-gray-300">
+            Cancelled
+          </Badge>
+        );
+      }
+      return <span>{status}</span>;
+    },
   },
   {
     accessorKey: "created_at",
@@ -154,6 +202,18 @@ export const getColumns = (
     cell: ({ row }) => {
       const invoice = row.original;
 
+      // Utility to ensure all date fields are Date objects
+      function ensureInvoiceDates(inv: EnrichedInvoice) {
+        return {
+          ...inv,
+          issue_date: inv.issue_date ? new Date(inv.issue_date) : null,
+          due_date: inv.due_date ? new Date(inv.due_date) : null,
+          payment_date: inv.payment_date ? new Date(inv.payment_date) : null,
+          created_at: inv.created_at ? new Date(inv.created_at) : null,
+          updated_at: inv.updated_at ? new Date(inv.updated_at) : null,
+        };
+      }
+
       const payAction =
         invoice.status !== "paid" ? (
           <FormModal<PayInvoiceFormValues>
@@ -167,17 +227,22 @@ export const getColumns = (
               </DropdownMenuItem>
             }
           >
-            <PayInvoiceForm onSubmit={() => {}} />
+            <PayInvoiceForm
+              onSubmit={() => {}}
+              defaultValues={{
+                payment_date:
+                  ensureInvoiceDates(invoice).payment_date ?? undefined,
+              }}
+            />
           </FormModal>
         ) : null;
 
-      const editComponent = (
-        <FormModal<InvoiceFormValues>
+      const editAction = (
+        <FormModal<InvoiceUpdate>
+          key={`edit-modal-${invoice.id}`}
           title="Edit Invoice"
-          description="Update the details below to edit the invoice."
-          onFormSubmit={(formData) =>
-            onEdit(row.original.id.toString(), formData)
-          }
+          description="Update the invoice details."
+          onFormSubmit={(formData) => onEdit(invoice.id.toString(), formData)}
           trigger={
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               Edit
@@ -185,7 +250,7 @@ export const getColumns = (
           }
         >
           <InvoiceForm
-            invoice={row.original}
+            invoice={ensureInvoiceDates(invoice) as unknown as EnrichedInvoice}
             suppliers={suppliers}
             departments={departments}
             onSubmit={() => {}}
@@ -197,7 +262,7 @@ export const getColumns = (
         <GenericCellAction
           data={invoice}
           onDelete={onDelete}
-          editComponent={editComponent}
+          editComponent={editAction}
           extraActions={payAction ? [payAction] : []}
         />
       );

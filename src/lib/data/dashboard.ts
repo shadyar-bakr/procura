@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { DashboardMetrics, ChartData, OverviewChartData } from "@/types";
 import { INVOICE_STATUS } from "@/lib/constants";
+import { QueryData } from "@supabase/supabase-js";
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const supabase = await createClient();
@@ -160,11 +161,15 @@ export async function getTopSuppliersData(): Promise<ChartData[]> {
   const supabase = await createClient();
 
   try {
-    const { data: invoices, error } = await supabase.from("invoices").select(`
+    const topSuppliersQuery = supabase.from("invoices").select(`
         amount,
         discount_amount,
         supplier:suppliers(name)
       `);
+
+    type TopSuppliers = QueryData<typeof topSuppliersQuery>;
+
+    const { data: invoices, error } = await topSuppliersQuery;
 
     if (error) {
       throw new Error("Failed to fetch top suppliers data");
@@ -173,7 +178,7 @@ export async function getTopSuppliersData(): Promise<ChartData[]> {
     // Aggregate by supplier
     const supplierTotals: Record<string, number> = {};
 
-    invoices?.forEach((invoice) => {
+    (invoices as TopSuppliers)?.forEach((invoice) => {
       if (invoice.supplier?.name) {
         const amount = invoice.amount - (invoice.discount_amount || 0);
         supplierTotals[invoice.supplier.name] =
@@ -200,11 +205,15 @@ export async function getTopDepartmentsData(): Promise<ChartData[]> {
   const supabase = await createClient();
 
   try {
-    const { data: invoices, error } = await supabase.from("invoices").select(`
+    const topDepartmentsQuery = supabase.from("invoices").select(`
         amount,
         discount_amount,
         department:departments(name)
       `);
+
+    type TopDepartments = QueryData<typeof topDepartmentsQuery>;
+
+    const { data: invoices, error } = await topDepartmentsQuery;
 
     if (error) {
       throw new Error("Failed to fetch top departments data");
@@ -213,7 +222,7 @@ export async function getTopDepartmentsData(): Promise<ChartData[]> {
     // Aggregate by department
     const departmentTotals: Record<string, number> = {};
 
-    invoices?.forEach((invoice) => {
+    (invoices as TopDepartments)?.forEach((invoice) => {
       if (invoice.department?.name) {
         const amount = invoice.amount - (invoice.discount_amount || 0);
         departmentTotals[invoice.department.name] =

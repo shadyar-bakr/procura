@@ -58,7 +58,9 @@ export function BarChart({ title, data, config, className }: BarChartProps) {
                 cursor={false}
                 content={
                   <ChartTooltipContent
-                    formatter={(value) => formatCurrency(value as number)}
+                    formatter={(value) =>
+                      formatCurrency(value as number, "IQD")
+                    }
                     indicator="dot"
                   />
                 }

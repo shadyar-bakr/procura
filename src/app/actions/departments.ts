@@ -9,6 +9,7 @@ import {
 import {
   ActionResponse,
   Department,
+  DepartmentFormValues,
   DepartmentInsert,
   DepartmentUpdate,
 } from "@/types";
@@ -18,11 +19,9 @@ import { departmentSchema } from "@/types/schemas";
 const updateDepartmentSchema = departmentSchema.partial();
 
 export async function createDepartmentAction(
-  formData: FormData
+  values: DepartmentFormValues
 ): Promise<ActionResponse<Department>> {
-  const validatedFields = departmentSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
+  const validatedFields = departmentSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return {
@@ -35,7 +34,7 @@ export async function createDepartmentAction(
   // Only pass DB fields
   const insertData: DepartmentInsert = {
     name: validatedFields.data.name,
-    description: validatedFields.data.description ?? null,
+    description: validatedFields.data.description || null,
   };
 
   try {
@@ -53,11 +52,9 @@ export async function createDepartmentAction(
 
 export async function updateDepartmentAction(
   id: number,
-  formData: FormData
+  values: DepartmentFormValues
 ): Promise<ActionResponse<Department>> {
-  const validatedFields = updateDepartmentSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
+  const validatedFields = updateDepartmentSchema.safeParse(values);
 
   if (!validatedFields.success) {
     return {
@@ -70,7 +67,7 @@ export async function updateDepartmentAction(
   // Only pass DB fields
   const updateData: DepartmentUpdate = {
     name: validatedFields.data.name,
-    description: validatedFields.data.description ?? null,
+    description: validatedFields.data.description || null,
   };
 
   try {

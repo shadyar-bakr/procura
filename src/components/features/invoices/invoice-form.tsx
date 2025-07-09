@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -22,10 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
-import { EnrichedInvoice, Supplier, Department } from "@/types";
+import {
+  EnrichedInvoice,
+  Supplier,
+  Department,
+  InvoiceFormValues,
+} from "@/types";
 import { invoiceSchema } from "@/types/schemas";
-
-export type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 
 interface InvoiceFormProps {
   invoice?: EnrichedInvoice | null;
@@ -47,7 +49,7 @@ export function InvoiceForm({
     amount: invoice?.amount || 0,
     discount_amount: invoice?.discount_amount ?? null,
     tax_amount: invoice?.tax_amount ?? null,
-    currency: invoice?.currency ?? "USD",
+    currency: "IQD",
     status: (invoice?.status as InvoiceFormValues["status"]) ?? "unpaid",
     notes: invoice?.notes ?? null,
     supplier_id: invoice?.supplier_id ?? null,
@@ -115,51 +117,26 @@ export function InvoiceForm({
                     </FormItem>
                   )}
                 />
-                {/* Currency */}
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value ?? "USD"}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="IQD">IQD</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Notes */}
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Optional notes about the invoice"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
             </div>
+            {/* Notes */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Optional notes about the invoice"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Parties */}
             <div>
               <h3 className="text-lg font-semibold mb-2">Parties</h3>

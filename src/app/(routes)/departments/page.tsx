@@ -1,8 +1,4 @@
 import { getDepartments } from "@/lib/data/departments";
-import {
-  deleteDepartmentAction,
-  deleteDepartmentsAction,
-} from "@/app/actions/departments";
 import { DepartmentsClient } from "@/components/features/departments/departments-client";
 import { PageError } from "@/components/shared/page-error";
 
@@ -12,13 +8,7 @@ export default async function DepartmentsPage() {
   try {
     const departments = await getDepartments();
 
-    return (
-      <DepartmentsClient
-        initialDepartments={departments}
-        onDeleteDepartment={deleteDepartmentAction}
-        onDeleteDepartments={deleteDepartmentsAction}
-      />
-    );
+    return <DepartmentsClient initialDepartments={departments} />;
   } catch (error) {
     console.error("Error loading departments:", error);
 

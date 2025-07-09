@@ -1,8 +1,4 @@
 import { getSuppliers } from "@/lib/data/suppliers";
-import {
-  deleteSupplierAction,
-  deleteSuppliersAction,
-} from "@/app/actions/suppliers";
 import { SuppliersClient } from "@/components/features/suppliers/suppliers-client";
 import { PageError } from "@/components/shared/page-error";
 
@@ -12,13 +8,7 @@ export default async function SuppliersPage() {
   try {
     const suppliers = await getSuppliers();
 
-    return (
-      <SuppliersClient
-        initialSuppliers={suppliers}
-        onDeleteSupplier={deleteSupplierAction}
-        onDeleteSuppliers={deleteSuppliersAction}
-      />
-    );
+    return <SuppliersClient initialSuppliers={suppliers} />;
   } catch (error) {
     console.error("Error loading suppliers:", error);
 

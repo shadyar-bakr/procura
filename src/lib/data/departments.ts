@@ -49,9 +49,8 @@ export async function createDepartment(
 
   if (error) {
     console.error("Error creating department:", error);
-    throw error;
+    throw new Error("Failed to create department");
   }
-
   return data;
 }
 
@@ -70,9 +69,8 @@ export async function updateDepartment(
 
   if (error) {
     console.error("Error updating department:", error);
-    throw error;
+    throw new Error("Failed to update department");
   }
-
   return data;
 }
 
@@ -83,6 +81,17 @@ export async function deleteDepartment(id: number): Promise<void> {
 
   if (error) {
     console.error("Error deleting department:", error);
-    throw error;
+    throw new Error("Failed to delete department");
+  }
+}
+
+export async function deleteDepartments(ids: number[]): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("departments").delete().in("id", ids);
+
+  if (error) {
+    console.error("Error deleting departments:", error);
+    throw new Error("Failed to delete departments");
   }
 }

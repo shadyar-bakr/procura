@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,23 +11,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { DatePicker } from "@/components/ui/date-picker";
-
-const payInvoiceSchema = z.object({
-  payment_date: z.date({
-    required_error: "A payment date is required.",
-  }),
-});
-
-export type PayInvoiceFormValues = z.infer<typeof payInvoiceSchema>;
+import { PayInvoiceFormValues } from "@/types";
+import { payInvoiceSchema } from "@/types/schemas";
 
 interface PayInvoiceFormProps {
   onSubmit: (values: PayInvoiceFormValues) => void;
   isPending?: boolean;
+  defaultValues?: Partial<PayInvoiceFormValues>;
 }
 
-export function PayInvoiceForm({ onSubmit, isPending }: PayInvoiceFormProps) {
+export function PayInvoiceForm({
+  onSubmit,
+  isPending,
+  defaultValues,
+}: PayInvoiceFormProps) {
   const form = useForm<PayInvoiceFormValues>({
     resolver: zodResolver(payInvoiceSchema),
+    defaultValues,
   });
 
   return (

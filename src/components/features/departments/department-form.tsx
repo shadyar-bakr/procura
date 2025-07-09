@@ -10,15 +10,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Department } from "@/types/index";
+import { Department, DepartmentFormValues } from "@/types/index";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { departmentSchema } from "@/types/schemas";
-import { z } from "zod";
-
-export type DepartmentFormValues = z.infer<typeof departmentSchema>;
 
 interface DepartmentFormProps {
   department?: Department | null;

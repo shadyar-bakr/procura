@@ -1,31 +1,31 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   Invoice,
-  EnrichedInvoice,
   InvoiceInsert,
   InvoiceUpdate,
+  EnrichedInvoice,
 } from "@/types";
+import { QueryData } from "@supabase/supabase-js";
 
-export async function getInvoices(): Promise<EnrichedInvoice[]> {
+export async function getEnrichedInvoices(): Promise<EnrichedInvoice[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("invoices")
-    .select(
-      `
-      *,
-      supplier:suppliers(*),
-      department:departments(*)
-    `
-    )
-    .order("created_at", { ascending: false });
+  const enrichedInvoicesQuery = supabase.from("invoices").select(`
+    *,
+    supplier:suppliers (*),
+    department:departments (*)
+  `);
+
+  type EnrichedInvoices = QueryData<typeof enrichedInvoicesQuery>;
+
+  const { data, error } = await enrichedInvoicesQuery;
 
   if (error) {
     console.error("Error fetching invoices:", error);
     throw new Error("Failed to fetch invoices");
   }
 
-  return data || [];
+  return (data as EnrichedInvoices) || [];
 }
 
 export async function getInvoiceById(
@@ -58,11 +58,7 @@ export async function createInvoice(invoice: InvoiceInsert): Promise<Invoice> {
 
   const { data, error } = await supabase
     .from("invoices")
-    .insert({
-      ...invoice,
-      status: "unpaid",
-      payment_date: null,
-    })
+    .insert(invoice)
     .select()
     .single();
 
@@ -91,7 +87,6 @@ export async function updateInvoice(
     console.error("Error updating invoice:", error);
     throw error;
   }
-
   return data;
 }
 
@@ -102,28 +97,41 @@ export async function deleteInvoice(id: number): Promise<void> {
 
   if (error) {
     console.error("Error deleting invoice:", error);
-    throw error;
+    throw new Error("Failed to delete invoice");
+  }
+}
+
+export async function deleteInvoices(ids: number[]): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("invoices").delete().in("id", ids);
+
+  if (error) {
+    console.error("Error deleting invoices:", error);
+    throw new Error("Failed to delete invoices");
   }
 }
 
 export async function payInvoice(
   id: number,
-  paymentDate: string
+  paymentDate: Date
 ): Promise<Invoice> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("invoices")
-    .update({ status: "paid", payment_date: paymentDate })
+    .update({
+      payment_date: paymentDate.toISOString(),
+      status: "paid",
+    })
     .eq("id", id)
     .select()
     .single();
 
   if (error) {
     console.error("Error paying invoice:", error);
-    throw error;
+    throw new Error("Failed to pay invoice");
   }
-
   return data;
 }
 

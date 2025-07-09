@@ -1,10 +1,10 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Supplier } from "@/types/index";
+import { Supplier, SupplierFormValues } from "@/types/index";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { SupplierForm, SupplierFormValues } from "./supplier-form";
+import { SupplierForm } from "./supplier-form";
 import { format } from "date-fns";
 import { GenericCellAction } from "@/components/shared/cell-action";
 import { FormModal } from "@/components/shared/form-modal";

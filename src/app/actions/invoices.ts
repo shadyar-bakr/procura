@@ -7,52 +7,45 @@ import {
   deleteInvoice,
   payInvoice,
 } from "@/lib/data/invoices";
-import { ActionResponse, Invoice, InvoiceInsert, InvoiceUpdate } from "@/types";
+import {
+  ActionResponse,
+  Invoice,
+  InvoiceInsert,
+  InvoiceUpdate,
+  PayInvoiceFormValues,
+} from "@/types";
 import { handleActionError } from "@/lib/action-handler";
 import { invoiceSchema } from "@/types/schemas";
-
-const updateInvoiceSchema = invoiceSchema.partial();
+import { payInvoiceSchema } from "@/types/schemas";
 
 export async function createInvoiceAction(
   formData: FormData
 ): Promise<ActionResponse<Invoice>> {
   try {
-    const parsed = invoiceSchema.safeParse(
+    const validatedFields = invoiceSchema.safeParse(
       Object.fromEntries(formData.entries())
     );
 
-    if (!parsed.success) {
+    if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: parsed.error.flatten().fieldErrors,
+        errors: validatedFields.error.flatten().fieldErrors,
       };
     }
 
     // Only pass DB fields
     const insertData: InvoiceInsert = {
-      invoice_number: parsed.data.invoice_number,
-      amount: parsed.data.amount,
-      discount_amount: parsed.data.discount_amount ?? null,
-      tax_amount: parsed.data.tax_amount ?? null,
-      currency: parsed.data.currency ?? null,
-      status: parsed.data.status ?? null,
-      issue_date:
-        parsed.data.issue_date instanceof Date
-          ? parsed.data.issue_date.toISOString()
-          : parsed.data.issue_date,
-      due_date:
-        parsed.data.due_date instanceof Date
-          ? parsed.data.due_date.toISOString()
-          : parsed.data.due_date,
-      payment_date: parsed.data.payment_date
-        ? parsed.data.payment_date instanceof Date
-          ? parsed.data.payment_date.toISOString()
-          : parsed.data.payment_date
-        : null,
-      notes: parsed.data.notes ?? null,
-      supplier_id: parsed.data.supplier_id ?? null,
-      department_id: parsed.data.department_id ?? null,
+      invoice_number: validatedFields.data.invoice_number,
+      amount: validatedFields.data.amount,
+      due_date: validatedFields.data.due_date.toISOString(),
+      issue_date: validatedFields.data.issue_date.toISOString(),
+      currency: validatedFields.data.currency ?? null,
+      status: validatedFields.data.status ?? null,
+      payment_date: validatedFields.data.payment_date?.toISOString() ?? null,
+      department_id: validatedFields.data.department_id,
+      supplier_id: validatedFields.data.supplier_id,
+      notes: validatedFields.data.notes,
     };
 
     const data = await createInvoice(insertData);
@@ -74,44 +67,32 @@ export async function updateInvoiceAction(
   formData: FormData
 ): Promise<ActionResponse<Invoice>> {
   try {
-    const parsed = updateInvoiceSchema.safeParse(
+    const validatedFields = invoiceSchema.safeParse(
       Object.fromEntries(formData.entries())
     );
 
-    if (!parsed.success) {
+    if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: parsed.error.flatten().fieldErrors,
+        errors: validatedFields.error.flatten().fieldErrors,
       };
     }
 
     // Only pass DB fields
     const updateData: InvoiceUpdate = {
-      invoice_number: parsed.data.invoice_number,
-      amount: parsed.data.amount,
-      discount_amount: parsed.data.discount_amount ?? null,
-      tax_amount: parsed.data.tax_amount ?? null,
-      currency: parsed.data.currency ?? null,
-      status: parsed.data.status ?? null,
-      issue_date: parsed.data.issue_date
-        ? parsed.data.issue_date instanceof Date
-          ? parsed.data.issue_date.toISOString()
-          : parsed.data.issue_date
-        : undefined,
-      due_date: parsed.data.due_date
-        ? parsed.data.due_date instanceof Date
-          ? parsed.data.due_date.toISOString()
-          : parsed.data.due_date
-        : undefined,
-      payment_date: parsed.data.payment_date
-        ? parsed.data.payment_date instanceof Date
-          ? parsed.data.payment_date.toISOString()
-          : parsed.data.payment_date
-        : undefined,
-      notes: parsed.data.notes ?? null,
-      supplier_id: parsed.data.supplier_id ?? null,
-      department_id: parsed.data.department_id ?? null,
+      invoice_number: validatedFields.data.invoice_number,
+      amount: validatedFields.data.amount,
+      discount_amount: validatedFields.data.discount_amount ?? null,
+      tax_amount: validatedFields.data.tax_amount ?? null,
+      currency: validatedFields.data.currency ?? null,
+      status: validatedFields.data.status ?? null,
+      issue_date: validatedFields.data.issue_date?.toISOString(),
+      due_date: validatedFields.data.due_date?.toISOString(),
+      payment_date: validatedFields.data.payment_date?.toISOString() ?? null,
+      notes: validatedFields.data.notes,
+      supplier_id: validatedFields.data.supplier_id,
+      department_id: validatedFields.data.department_id,
     };
 
     const data = await updateInvoice(id, updateData);
@@ -152,14 +133,29 @@ export async function deleteInvoicesAction(
 
 export async function payInvoiceAction(
   id: number,
-  paymentDate: string
-): Promise<ActionResponse> {
+  data: PayInvoiceFormValues
+): Promise<ActionResponse<Invoice>> {
   try {
-    await payInvoice(id, paymentDate);
+    const parsed = payInvoiceSchema.safeParse(data);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: "Invalid form data",
+        errors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const paidData = await payInvoice(id, parsed.data.payment_date);
     revalidatePath("/invoices");
     revalidatePath("/"); // Revalidate dashboard
-    return { success: true, message: "Invoice paid successfully" };
+
+    return {
+      success: true,
+      message: "Invoice paid successfully",
+      data: paidData,
+    };
   } catch (error: unknown) {
-    return handleActionError(error, "Failed to pay invoice.");
+    return handleActionError<Invoice>(error, "Failed to pay invoice.");
   }
 }

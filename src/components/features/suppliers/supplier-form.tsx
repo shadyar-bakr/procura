@@ -10,15 +10,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Supplier } from "@/types/index";
+import { Supplier, SupplierFormValues } from "@/types/index";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { supplierSchema } from "@/types/schemas";
-
-export type SupplierFormValues = z.infer<typeof supplierSchema>;
 
 interface SupplierFormProps {
   supplier?: Supplier | null;

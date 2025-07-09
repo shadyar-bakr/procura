@@ -1,10 +1,6 @@
-import { getInvoices } from "@/lib/data/invoices";
+import { getEnrichedInvoices } from "@/lib/data/invoices";
 import { getSuppliers } from "@/lib/data/suppliers";
 import { getDepartments } from "@/lib/data/departments";
-import {
-  deleteInvoiceAction,
-  deleteInvoicesAction,
-} from "@/app/actions/invoices";
 import { InvoicesClient } from "@/components/features/invoices/invoices-client";
 import { PageError } from "@/components/shared/page-error";
 
@@ -13,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function InvoicesPage() {
   try {
     const [invoices, suppliers, departments] = await Promise.all([
-      getInvoices(),
+      getEnrichedInvoices(),
       getSuppliers(),
       getDepartments(),
     ]);
@@ -23,8 +19,6 @@ export default async function InvoicesPage() {
         initialInvoices={invoices}
         suppliers={suppliers}
         departments={departments}
-        onDeleteInvoice={deleteInvoiceAction}
-        onDeleteInvoices={deleteInvoicesAction}
       />
     );
   } catch (error) {

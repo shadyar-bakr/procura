@@ -5,10 +5,12 @@ import {
   createSupplier,
   updateSupplier,
   deleteSupplier,
+  deleteSuppliers,
 } from "@/lib/data/suppliers";
 import {
   ActionResponse,
   Supplier,
+  SupplierFormValues,
   SupplierInsert,
   SupplierUpdate,
 } from "@/types";
@@ -18,12 +20,10 @@ import { supplierSchema } from "@/types/schemas";
 const updateSupplierSchema = supplierSchema.partial();
 
 export async function createSupplierAction(
-  formData: FormData
+  values: SupplierFormValues
 ): Promise<ActionResponse<Supplier>> {
   try {
-    const parsed = supplierSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const parsed = supplierSchema.safeParse(values);
 
     if (!parsed.success) {
       return {
@@ -36,12 +36,12 @@ export async function createSupplierAction(
     // Only pass DB fields
     const insertData: SupplierInsert = {
       name: parsed.data.name,
-      address: parsed.data.address ?? null,
-      contact_person: parsed.data.contact_person ?? null,
-      email: parsed.data.email ?? null,
-      phone: parsed.data.phone ?? null,
-      tax_id: parsed.data.tax_id ?? null,
-      notes: parsed.data.notes ?? null,
+      address: parsed.data.address || null,
+      contact_person: parsed.data.contact_person || null,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      tax_id: parsed.data.tax_id || null,
+      notes: parsed.data.notes || null,
     };
 
     const data = await createSupplier(insertData);
@@ -59,12 +59,10 @@ export async function createSupplierAction(
 
 export async function updateSupplierAction(
   id: number,
-  formData: FormData
+  values: SupplierFormValues
 ): Promise<ActionResponse<Supplier>> {
   try {
-    const parsed = updateSupplierSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const parsed = updateSupplierSchema.safeParse(values);
 
     if (!parsed.success) {
       return {
@@ -77,12 +75,12 @@ export async function updateSupplierAction(
     // Only pass DB fields
     const updateData: SupplierUpdate = {
       name: parsed.data.name,
-      address: parsed.data.address ?? null,
-      contact_person: parsed.data.contact_person ?? null,
-      email: parsed.data.email ?? null,
-      phone: parsed.data.phone ?? null,
-      tax_id: parsed.data.tax_id ?? null,
-      notes: parsed.data.notes ?? null,
+      address: parsed.data.address || null,
+      contact_person: parsed.data.contact_person || null,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      tax_id: parsed.data.tax_id || null,
+      notes: parsed.data.notes || null,
     };
 
     const data = await updateSupplier(id, updateData);
@@ -117,13 +115,13 @@ export async function deleteSuppliersAction(
   ids: number[]
 ): Promise<ActionResponse> {
   try {
-    await Promise.all(ids.map((id) => deleteSupplier(id)));
+    await deleteSuppliers(ids);
     revalidatePath("/suppliers");
     return {
       success: true,
-      message: "Selected suppliers deleted successfully",
+      message: "Suppliers deleted successfully",
     };
   } catch (error: unknown) {
-    return handleActionError(error, "Failed to delete one or more suppliers.");
+    return handleActionError(error, "Failed to delete suppliers.");
   }
 }
