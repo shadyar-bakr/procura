@@ -118,6 +118,7 @@ interface DataTableProps<TData, TValue> {
   onDeleteSelected?: (selectedItems: TData[]) => void;
   initialColumnVisibility?: VisibilityState;
   isLoading?: boolean;
+  emptyState?: React.ReactNode;
 }
 
 export default function DataTable<TData, TValue>({
@@ -129,6 +130,7 @@ export default function DataTable<TData, TValue>({
   onDeleteSelected,
   initialColumnVisibility,
   isLoading,
+  emptyState,
 }: DataTableProps<TData, TValue>) {
   const id = useId();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -352,6 +354,10 @@ export default function DataTable<TData, TValue>({
                   ))}
                 </TableRow>
               ))
+            ) : emptyState ? (
+              <TableRow>
+                <TableCell colSpan={columns.length}>{emptyState}</TableCell>
+              </TableRow>
             ) : (
               <TableRow>
                 <TableCell

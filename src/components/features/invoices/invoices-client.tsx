@@ -15,6 +15,7 @@ import { FormModal } from "@/components/shared/form-modal";
 import { InvoiceForm } from "@/components/features/invoices/invoice-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
 
 interface InvoicesClientProps {
   initialInvoices: EnrichedInvoice[];
@@ -73,21 +74,13 @@ export function InvoicesClient({
     async (data: InvoiceFormValues) => {
       startTransition(async () => {
         const formData = new FormData();
-        formData.append("invoice_number", data.invoice_number);
-        formData.append("supplier_id", data.supplier_id);
-        formData.append("department_id", data.department_id);
-        formData.append("amount", data.amount.toString());
-        if (data.discount_amount)
-          formData.append("discount_amount", data.discount_amount.toString());
-        if (data.tax_amount)
-          formData.append("tax_amount", data.tax_amount.toString());
-        if (data.currency) formData.append("currency", data.currency);
-        if (data.status) formData.append("status", data.status);
-        formData.append("issue_date", data.issue_date);
-        formData.append("due_date", data.due_date);
-        if (data.payment_date)
-          formData.append("payment_date", data.payment_date);
-        if (data.notes) formData.append("notes", data.notes);
+        Object.entries(data).forEach(([key, value]) => {
+          if (value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else if (value !== null && value !== undefined) {
+            formData.append(key, String(value));
+          }
+        });
 
         const result = await createInvoiceAction(formData);
         if (result.success) {
@@ -112,21 +105,13 @@ export function InvoicesClient({
     async (id: string, data: InvoiceFormValues) => {
       startTransition(async () => {
         const formData = new FormData();
-        formData.append("invoice_number", data.invoice_number);
-        formData.append("supplier_id", data.supplier_id);
-        formData.append("department_id", data.department_id);
-        formData.append("amount", data.amount.toString());
-        if (data.discount_amount)
-          formData.append("discount_amount", data.discount_amount.toString());
-        if (data.tax_amount)
-          formData.append("tax_amount", data.tax_amount.toString());
-        if (data.currency) formData.append("currency", data.currency);
-        if (data.status) formData.append("status", data.status);
-        formData.append("issue_date", data.issue_date);
-        formData.append("due_date", data.due_date);
-        if (data.payment_date)
-          formData.append("payment_date", data.payment_date);
-        if (data.notes) formData.append("notes", data.notes);
+        Object.entries(data).forEach(([key, value]) => {
+          if (value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else if (value !== null && value !== undefined) {
+            formData.append(key, String(value));
+          }
+        });
 
         const result = await updateInvoiceAction(parseInt(id), formData);
         if (result.success) {
@@ -164,6 +149,25 @@ export function InvoicesClient({
         <h1 className="text-2xl font-semibold">Invoices</h1>
       </div>
       <div className="mt-4">
+        <FormModal
+          title="Add New Invoice"
+          description="Fill in the details below to add a new invoice."
+          onFormSubmit={handleAddInvoice}
+          trigger={
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Invoice
+            </Button>
+          }
+        >
+          <InvoiceForm
+            suppliers={suppliers}
+            departments={departments}
+            onSubmit={() => {}}
+          />
+        </FormModal>
+      </div>
+      <div className="mt-4">
         <DataTable
           columns={invoiceColumns}
           data={initialInvoices}
@@ -175,6 +179,19 @@ export function InvoicesClient({
             supplier: false,
             department: false,
           }}
+          emptyState={
+            <EmptyState
+              title="No Invoices Found"
+              description="Get started by creating a new invoice."
+              buttonText="Create Invoice"
+              onButtonClick={() => {
+                const trigger = document.querySelector(
+                  '[aria-haspopup="dialog"]'
+                ) as HTMLButtonElement;
+                if (trigger) trigger.click();
+              }}
+            />
+          }
           toolbar={
             <FormModal
               title="Add New Invoice"

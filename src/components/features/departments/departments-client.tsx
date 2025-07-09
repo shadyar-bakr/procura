@@ -15,6 +15,7 @@ import { FormModal } from "@/components/shared/form-modal";
 import { DepartmentForm } from "@/components/features/departments/department-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
 
 interface DepartmentsClientProps {
   initialDepartments: Department[];
@@ -130,6 +131,19 @@ export function DepartmentsClient({
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Departments</h1>
+        <FormModal
+          title="Add New Department"
+          description="Fill in the details below to add a new department."
+          onFormSubmit={handleAddDepartment}
+          trigger={
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Department
+            </Button>
+          }
+        >
+          <DepartmentForm onSubmit={() => {}} />
+        </FormModal>
       </div>
       <div className="mt-4">
         <DataTable
@@ -139,20 +153,20 @@ export function DepartmentsClient({
           filterColumn="name"
           filterColumnPlaceholder="Filter by name..."
           onDeleteSelected={handleDeleteSelectedDepartments}
-          toolbar={
-            <FormModal
-              title="Add New Department"
-              description="Fill in the details below to add a new department."
-              onFormSubmit={handleAddDepartment}
-              trigger={
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Department
-                </Button>
-              }
-            >
-              <DepartmentForm onSubmit={() => {}} />
-            </FormModal>
+          emptyState={
+            <EmptyState
+              title="No Departments Found"
+              description="Get started by creating a new department."
+              buttonText="Create Department"
+              onButtonClick={() => {
+                // This is a bit of a hack to trigger the modal which is outside the datatable
+                // A better implementation would involve lifting state up.
+                const trigger = document.querySelector(
+                  '[aria-haspopup="dialog"]'
+                ) as HTMLButtonElement;
+                if (trigger) trigger.click();
+              }}
+            />
           }
         />
       </div>

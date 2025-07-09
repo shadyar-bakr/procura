@@ -15,6 +15,7 @@ import { FormModal } from "@/components/shared/form-modal";
 import { SupplierForm } from "@/components/features/suppliers/supplier-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
 
 interface SuppliersClientProps {
   initialSuppliers: Supplier[];
@@ -165,6 +166,19 @@ export function SuppliersClient({
             >
               <SupplierForm onSubmit={() => {}} />
             </FormModal>
+          }
+          emptyState={
+            <EmptyState
+              title="No Suppliers Found"
+              description="Get started by creating a new supplier."
+              buttonText="Create Supplier"
+              onButtonClick={() => {
+                const trigger = document.querySelector(
+                  '[aria-haspopup="dialog"]'
+                ) as HTMLButtonElement;
+                if (trigger) trigger.click();
+              }}
+            />
           }
         />
       </div>
