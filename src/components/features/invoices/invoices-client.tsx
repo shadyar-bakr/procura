@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   createInvoiceAction,
   updateInvoiceAction,
+  payInvoiceAction,
 } from "@/app/actions/invoices";
 import { useRouter } from "next/navigation";
 import { FormModal } from "@/components/shared/form-modal";
@@ -34,6 +35,23 @@ export function InvoicesClient({
 }: InvoicesClientProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  const handlePayInvoice = useCallback(
+    async (id: string) => {
+      startTransition(async () => {
+        const result = await payInvoiceAction(parseInt(id));
+        if (result.success) {
+          toast.success(result.message);
+          router.refresh();
+        } else {
+          toast.error(result.message, {
+            description: result.error?.details || result.error?.message,
+          });
+        }
+      });
+    },
+    [router]
+  );
 
   const handleDeleteInvoice = useCallback(
     async (id: string) => {
@@ -138,34 +156,22 @@ export function InvoicesClient({
         suppliers,
         departments,
         handleEditInvoice,
-        handleDeleteInvoice
+        handleDeleteInvoice,
+        handlePayInvoice
       ),
-    [suppliers, departments, handleEditInvoice, handleDeleteInvoice]
+    [
+      suppliers,
+      departments,
+      handleEditInvoice,
+      handleDeleteInvoice,
+      handlePayInvoice,
+    ]
   );
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Invoices</h1>
-      </div>
-      <div className="mt-4">
-        <FormModal
-          title="Add New Invoice"
-          description="Fill in the details below to add a new invoice."
-          onFormSubmit={handleAddInvoice}
-          trigger={
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Invoice
-            </Button>
-          }
-        >
-          <InvoiceForm
-            suppliers={suppliers}
-            departments={departments}
-            onSubmit={() => {}}
-          />
-        </FormModal>
       </div>
       <div className="mt-4">
         <DataTable
@@ -182,14 +188,7 @@ export function InvoicesClient({
           emptyState={
             <EmptyState
               title="No Invoices Found"
-              description="Get started by creating a new invoice."
-              buttonText="Create Invoice"
-              onButtonClick={() => {
-                const trigger = document.querySelector(
-                  '[aria-haspopup="dialog"]'
-                ) as HTMLButtonElement;
-                if (trigger) trigger.click();
-              }}
+              description="There are no invoices to display."
             />
           }
           toolbar={

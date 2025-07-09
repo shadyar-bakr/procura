@@ -5,6 +5,7 @@ import {
   createInvoice,
   updateInvoice,
   deleteInvoice,
+  payInvoice,
 } from "@/lib/data/invoices";
 import { ActionResponse, Invoice } from "@/types";
 import { handleActionError } from "@/lib/action-handler";
@@ -92,5 +93,16 @@ export async function deleteInvoicesAction(
     return { success: true, message: "Invoices deleted successfully" };
   } catch (error: unknown) {
     return handleActionError(error, "Failed to delete invoices.");
+  }
+}
+
+export async function payInvoiceAction(id: number): Promise<ActionResponse> {
+  try {
+    await payInvoice(id);
+    revalidatePath("/invoices");
+    revalidatePath("/"); // Revalidate dashboard
+    return { success: true, message: "Invoice paid successfully" };
+  } catch (error: unknown) {
+    return handleActionError(error, "Failed to pay invoice.");
   }
 }

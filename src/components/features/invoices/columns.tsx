@@ -15,7 +15,8 @@ export const getColumns = (
   suppliers: Supplier[],
   departments: Department[],
   onEdit: (id: string, data: InvoiceFormValues) => void,
-  onDelete: (id: string) => void
+  onDelete: (id: string) => void,
+  onPay: (id: string) => void
 ): ColumnDef<EnrichedInvoice>[] => [
   {
     id: "select",
@@ -48,7 +49,7 @@ export const getColumns = (
   },
   {
     accessorKey: "supplier",
-    id: "supplier.name",
+    id: "supplier",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Supplier" />
     ),
@@ -136,6 +137,15 @@ export const getColumns = (
   {
     id: "actions",
     cell: ({ row }) => {
+      const invoice = row.original;
+
+      const payAction =
+        invoice.status !== "paid" ? (
+          <DropdownMenuItem onClick={() => onPay(invoice.id.toString())}>
+            Pay
+          </DropdownMenuItem>
+        ) : null;
+
       const editComponent = (
         <FormModal<InvoiceFormValues>
           title="Edit Invoice"
@@ -160,9 +170,10 @@ export const getColumns = (
 
       return (
         <GenericCellAction
-          data={row.original}
+          data={invoice}
           onDelete={onDelete}
           editComponent={editComponent}
+          extraActions={payAction ? [payAction] : []}
         />
       );
     },

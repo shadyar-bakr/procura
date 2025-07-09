@@ -170,14 +170,7 @@ export function SuppliersClient({
           emptyState={
             <EmptyState
               title="No Suppliers Found"
-              description="Get started by creating a new supplier."
-              buttonText="Create Supplier"
-              onButtonClick={() => {
-                const trigger = document.querySelector(
-                  '[aria-haspopup="dialog"]'
-                ) as HTMLButtonElement;
-                if (trigger) trigger.click();
-              }}
+              description="There are no suppliers to display."
             />
           }
         />

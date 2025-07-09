@@ -102,6 +102,24 @@ export async function deleteInvoice(id: number): Promise<void> {
   }
 }
 
+export async function payInvoice(id: number): Promise<Invoice> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("invoices")
+    .update({ status: "paid", payment_date: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error paying invoice:", error);
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getInvoicesBySupplier(
   supplierId: number
 ): Promise<EnrichedInvoice[]> {

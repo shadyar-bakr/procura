@@ -16,6 +16,7 @@ interface CellActionProps<T extends { id: number | string }> {
   onDelete: (id: string) => void;
   editComponent: React.ReactNode;
   deleteConfirmationText?: string;
+  extraActions?: React.ReactNode[];
 }
 
 export function GenericCellAction<T extends { id: number | string }>({
@@ -23,6 +24,7 @@ export function GenericCellAction<T extends { id: number | string }>({
   onDelete,
   editComponent,
   deleteConfirmationText = "This action cannot be undone.",
+  extraActions,
 }: CellActionProps<T>) {
   return (
     <DropdownMenu>
@@ -35,6 +37,7 @@ export function GenericCellAction<T extends { id: number | string }>({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         {editComponent}
+        {extraActions}
         <ConfirmationDialog
           title="Are you sure?"
           description={deleteConfirmationText}

@@ -4,18 +4,21 @@ import { useMemo, useTransition, useCallback } from "react";
 import { Department, ActionResponse } from "@/types";
 import { getColumns } from "@/components/features/departments/columns";
 import DataTable from "@/components/shared/data-table";
-import { DepartmentFormValues } from "@/components/features/departments/department-form";
+import {
+  DepartmentForm,
+  DepartmentFormValues,
+} from "@/components/features/departments/department-form";
 import { toast } from "sonner";
 import {
   createDepartmentAction,
   updateDepartmentAction,
 } from "@/app/actions/departments";
 import { useRouter } from "next/navigation";
+import { EmptyState } from "@/components/shared/empty-state";
 import { FormModal } from "@/components/shared/form-modal";
-import { DepartmentForm } from "@/components/features/departments/department-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { EmptyState } from "@/components/shared/empty-state";
+import { InvoiceForm } from "../invoices/invoice-form";
 
 interface DepartmentsClientProps {
   initialDepartments: Department[];
@@ -131,19 +134,6 @@ export function DepartmentsClient({
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Departments</h1>
-        <FormModal
-          title="Add New Department"
-          description="Fill in the details below to add a new department."
-          onFormSubmit={handleAddDepartment}
-          trigger={
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Department
-            </Button>
-          }
-        >
-          <DepartmentForm onSubmit={() => {}} />
-        </FormModal>
       </div>
       <div className="mt-4">
         <DataTable
@@ -156,17 +146,23 @@ export function DepartmentsClient({
           emptyState={
             <EmptyState
               title="No Departments Found"
-              description="Get started by creating a new department."
-              buttonText="Create Department"
-              onButtonClick={() => {
-                // This is a bit of a hack to trigger the modal which is outside the datatable
-                // A better implementation would involve lifting state up.
-                const trigger = document.querySelector(
-                  '[aria-haspopup="dialog"]'
-                ) as HTMLButtonElement;
-                if (trigger) trigger.click();
-              }}
+              description="There are no departments to display."
             />
+          }
+          toolbar={
+            <FormModal
+              title="Add New Department"
+              description="Fill in the details below to add a new department."
+              onFormSubmit={handleAddDepartment}
+              trigger={
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Department
+                </Button>
+              }
+            >
+              <DepartmentForm onSubmit={() => {}} />
+            </FormModal>
           }
         />
       </div>
