@@ -96,9 +96,12 @@ export async function deleteInvoicesAction(
   }
 }
 
-export async function payInvoiceAction(id: number): Promise<ActionResponse> {
+export async function payInvoiceAction(
+  id: number,
+  paymentDate: string
+): Promise<ActionResponse> {
   try {
-    await payInvoice(id);
+    await payInvoice(id, paymentDate);
     revalidatePath("/invoices");
     revalidatePath("/"); // Revalidate dashboard
     return { success: true, message: "Invoice paid successfully" };

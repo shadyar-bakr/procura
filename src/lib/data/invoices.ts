@@ -102,12 +102,15 @@ export async function deleteInvoice(id: number): Promise<void> {
   }
 }
 
-export async function payInvoice(id: number): Promise<Invoice> {
+export async function payInvoice(
+  id: number,
+  paymentDate: string
+): Promise<Invoice> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("invoices")
-    .update({ status: "paid", payment_date: new Date().toISOString() })
+    .update({ status: "paid", payment_date: paymentDate })
     .eq("id", id)
     .select()
     .single();

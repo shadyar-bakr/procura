@@ -17,6 +17,7 @@ import { InvoiceForm } from "@/components/features/invoices/invoice-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PayInvoiceFormValues } from "./pay-invoice-form";
 
 interface InvoicesClientProps {
   initialInvoices: EnrichedInvoice[];
@@ -37,9 +38,12 @@ export function InvoicesClient({
   const router = useRouter();
 
   const handlePayInvoice = useCallback(
-    async (id: string) => {
+    async (id: string, data: PayInvoiceFormValues) => {
       startTransition(async () => {
-        const result = await payInvoiceAction(parseInt(id));
+        const result = await payInvoiceAction(
+          parseInt(id),
+          data.payment_date.toISOString()
+        );
         if (result.success) {
           toast.success(result.message);
           router.refresh();
@@ -159,13 +163,7 @@ export function InvoicesClient({
         handleDeleteInvoice,
         handlePayInvoice
       ),
-    [
-      suppliers,
-      departments,
-      handleEditInvoice,
-      handleDeleteInvoice,
-      handlePayInvoice,
-    ]
+    [suppliers, departments, handleEditInvoice, handleDeleteInvoice]
   );
 
   return (

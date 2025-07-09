@@ -135,19 +135,6 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
         />
         <FormField
           control={form.control}
-          name="tax_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tax ID</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="notes"
           render={({ field }) => (
             <FormItem>

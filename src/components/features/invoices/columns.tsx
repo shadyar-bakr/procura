@@ -10,13 +10,14 @@ import { formatCurrency } from "@/lib/utils";
 import { GenericCellAction } from "@/components/shared/cell-action";
 import { FormModal } from "@/components/shared/form-modal";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { PayInvoiceForm, PayInvoiceFormValues } from "./pay-invoice-form";
 
 export const getColumns = (
   suppliers: Supplier[],
   departments: Department[],
   onEdit: (id: string, data: InvoiceFormValues) => void,
   onDelete: (id: string) => void,
-  onPay: (id: string) => void
+  onPay: (id: string, data: PayInvoiceFormValues) => void
 ): ColumnDef<EnrichedInvoice>[] => [
   {
     id: "select",
@@ -141,9 +142,18 @@ export const getColumns = (
 
       const payAction =
         invoice.status !== "paid" ? (
-          <DropdownMenuItem onClick={() => onPay(invoice.id.toString())}>
-            Pay
-          </DropdownMenuItem>
+          <FormModal<PayInvoiceFormValues>
+            title="Pay Invoice"
+            description="Select a payment date for the invoice."
+            onFormSubmit={(formData) => onPay(invoice.id.toString(), formData)}
+            trigger={
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                Pay
+              </DropdownMenuItem>
+            }
+          >
+            <PayInvoiceForm onSubmit={() => {}} />
+          </FormModal>
         ) : null;
 
       const editComponent = (
