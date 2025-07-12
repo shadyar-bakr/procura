@@ -55,23 +55,6 @@ export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
   });
 }
 
-export async function getSupplierById(id: number): Promise<Supplier | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("suppliers")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching supplier:", error);
-    return null;
-  }
-
-  return data;
-}
-
 export async function createSupplier(
   supplier: SupplierInsert
 ): Promise<Supplier> {

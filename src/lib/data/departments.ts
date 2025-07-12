@@ -55,25 +55,6 @@ export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
   });
 }
 
-export async function getDepartmentById(
-  id: number
-): Promise<Department | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("departments")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching department:", error);
-    return null;
-  }
-
-  return data;
-}
-
 export async function createDepartment(
   department: DepartmentInsert
 ): Promise<Department> {

@@ -28,31 +28,6 @@ export async function getEnrichedInvoices(): Promise<EnrichedInvoice[]> {
   return (data as EnrichedInvoices) || [];
 }
 
-export async function getInvoiceById(
-  id: number
-): Promise<EnrichedInvoice | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("invoices")
-    .select(
-      `
-      *,
-      supplier:suppliers(*),
-      department:departments(*)
-    `
-    )
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching invoice:", error);
-    return null;
-  }
-
-  return data;
-}
-
 export async function createInvoice(invoice: InvoiceInsert): Promise<Invoice> {
   const supabase = await createClient();
 
@@ -133,54 +108,4 @@ export async function payInvoice(
     throw new Error("Failed to pay invoice");
   }
   return data;
-}
-
-export async function getInvoicesBySupplier(
-  supplierId: number
-): Promise<EnrichedInvoice[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("invoices")
-    .select(
-      `
-      *,
-      supplier:suppliers(*),
-      department:departments(*)
-    `
-    )
-    .eq("supplier_id", supplierId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching invoices by supplier:", error);
-    throw new Error("Failed to fetch invoices by supplier");
-  }
-
-  return data || [];
-}
-
-export async function getInvoicesByDepartment(
-  departmentId: number
-): Promise<EnrichedInvoice[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("invoices")
-    .select(
-      `
-      *,
-      supplier:suppliers(*),
-      department:departments(*)
-    `
-    )
-    .eq("department_id", departmentId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching invoices by department:", error);
-    throw new Error("Failed to fetch invoices by department");
-  }
-
-  return data || [];
 }
