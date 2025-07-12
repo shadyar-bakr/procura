@@ -6,11 +6,11 @@ import {
   DepartmentWithUnpaidStats,
   InvoiceData,
 } from "@/types";
+import { calculateUnpaidInvoiceStats } from "@/lib/utils";
 
 export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
   const supabase = await createClient();
 
-  // Fetch departments with their unpaid invoices (status = 'unpaid')
   const { data, error } = await supabase
     .from("departments")
     .select(`*, invoices:invoices!invoices_department_id_fkey(status, amount)`)
@@ -21,21 +21,36 @@ export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
     throw new Error("Failed to fetch departments");
   }
 
-  // Aggregate unpaid invoices for each department
-  return (data || []).map((department) => {
-    const invoices =
-      (department as Department & { invoices: InvoiceData[] }).invoices || [];
-    const unpaidInvoices = invoices.filter(
-      (invoice: InvoiceData) => invoice.status === "unpaid"
-    );
+  type RawInvoiceFromSupabase = {
+    status: string | null;
+    amount: number;
+  };
+
+  type RawDepartmentFromSupabase = Department & {
+    invoices?: RawInvoiceFromSupabase[];
+  };
+
+  return (data || []).map((department: RawDepartmentFromSupabase) => {
+    const rawInvoices = department.invoices || [];
+
+    const processedInvoices: InvoiceData[] = rawInvoices
+      .filter(
+        (
+          inv
+        ): inv is RawInvoiceFromSupabase & { status: InvoiceData["status"] } =>
+          inv.status !== null &&
+          ["unpaid", "paid", "partial", "cancelled"].includes(inv.status)
+      )
+      .map((inv) => ({
+        status: inv.status,
+        amount: inv.amount,
+      }));
+
+    const stats = calculateUnpaidInvoiceStats(processedInvoices);
 
     return {
       ...department,
-      unpaid_invoice_count: unpaidInvoices.length,
-      unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum: number, invoice: InvoiceData) => sum + (invoice.amount || 0),
-        0
-      ),
+      ...stats,
     } as DepartmentWithUnpaidStats;
   });
 }
