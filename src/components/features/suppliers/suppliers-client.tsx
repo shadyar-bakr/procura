@@ -1,6 +1,6 @@
 "use client";
 
-import { Supplier, SupplierFormValues } from "@/types";
+import { SupplierWithUnpaidStats, SupplierFormValues } from "@/types";
 import { getColumns } from "@/components/features/suppliers/columns";
 import DataTable from "@/components/shared/data-table";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { PlusCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 
 interface SuppliersClientProps {
-  initialSuppliers: Supplier[];
+  initialSuppliers: SupplierWithUnpaidStats[];
 }
 
 export function SuppliersClient({ initialSuppliers }: SuppliersClientProps) {
@@ -37,7 +37,7 @@ export function SuppliersClient({ initialSuppliers }: SuppliersClientProps) {
   };
 
   const handleDeleteSelectedSuppliers = async (
-    selectedSuppliers: Supplier[]
+    selectedSuppliers: SupplierWithUnpaidStats[]
   ) => {
     const selectedIds = selectedSuppliers.map((s) => s.id);
     const result = await deleteSuppliersAction(selectedIds);
@@ -93,7 +93,7 @@ export function SuppliersClient({ initialSuppliers }: SuppliersClientProps) {
         <h1 className="text-2xl font-semibold">Suppliers</h1>
       </div>
       <div className="mt-4">
-        <DataTable
+        <DataTable<SupplierWithUnpaidStats, unknown>
           columns={supplierColumns}
           data={initialSuppliers}
           isLoading={false}
