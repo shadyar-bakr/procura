@@ -1,7 +1,7 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Supplier, SupplierFormValues } from "@/types/index";
+import { SupplierWithUnpaidStats, SupplierFormValues } from "@/types/index";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { SupplierForm } from "./supplier-form";
@@ -13,7 +13,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 export const getColumns = (
   onEdit: (id: string, data: SupplierFormValues) => void,
   onDelete: (id: string) => void
-): ColumnDef<Supplier>[] => [
+): ColumnDef<SupplierWithUnpaidStats>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -91,6 +91,20 @@ export const getColumns = (
       row.original.updated_at
         ? format(new Date(row.original.updated_at), "PPP")
         : "N/A",
+  },
+  {
+    accessorKey: "unpaid_invoice_count",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Unpaid Invoices" />
+    ),
+    cell: ({ row }) => row.original.unpaid_invoice_count,
+  },
+  {
+    accessorKey: "unpaid_invoice_total",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Unpaid Total" />
+    ),
+    cell: ({ row }) => row.original.unpaid_invoice_total.toLocaleString(),
   },
   {
     id: "actions",

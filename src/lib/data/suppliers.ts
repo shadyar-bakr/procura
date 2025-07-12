@@ -1,12 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
-import { Supplier, SupplierInsert, SupplierUpdate } from "@/types";
+import {
+  Supplier,
+  SupplierInsert,
+  SupplierUpdate,
+  SupplierWithUnpaidStats,
+} from "@/types";
 
-export async function getSuppliers(): Promise<Supplier[]> {
+export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
   const supabase = await createClient();
 
+  // Fetch suppliers with their unpaid invoices (status = 'unpaid')
   const { data, error } = await supabase
     .from("suppliers")
-    .select("*")
+    .select(`*, invoices:invoices!invoices_supplier_id_fkey(status, amount)`)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -14,7 +20,22 @@ export async function getSuppliers(): Promise<Supplier[]> {
     throw new Error("Failed to fetch suppliers");
   }
 
-  return data || [];
+  // Aggregate unpaid invoices for each supplier
+  return (data || []).map((supplier) => {
+    const invoices = (supplier as any).invoices || [];
+    const unpaidInvoices = invoices.filter(
+      (invoice: any) => invoice.status === "unpaid"
+    );
+
+    return {
+      ...supplier,
+      unpaid_invoice_count: unpaidInvoices.length,
+      unpaid_invoice_total: unpaidInvoices.reduce(
+        (sum: number, invoice: any) => sum + (invoice.amount || 0),
+        0
+      ),
+    } as SupplierWithUnpaidStats;
+  });
 }
 
 export async function getSupplierById(id: number): Promise<Supplier | null> {

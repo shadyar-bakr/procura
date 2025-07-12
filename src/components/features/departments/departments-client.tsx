@@ -1,6 +1,6 @@
 "use client";
 
-import { Department, DepartmentFormValues } from "@/types";
+import { DepartmentWithUnpaidStats, DepartmentFormValues } from "@/types";
 import { getColumns } from "@/components/features/departments/columns";
 import DataTable from "@/components/shared/data-table";
 import { DepartmentForm } from "@/components/features/departments/department-form";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
 interface DepartmentsClientProps {
-  initialDepartments: Department[];
+  initialDepartments: DepartmentWithUnpaidStats[];
 }
 
 export function DepartmentsClient({
@@ -39,7 +39,7 @@ export function DepartmentsClient({
   };
 
   const handleDeleteSelectedDepartments = async (
-    selectedDepartments: Department[]
+    selectedDepartments: DepartmentWithUnpaidStats[]
   ) => {
     const selectedIds = selectedDepartments.map((d) => d.id);
     const result = await deleteDepartmentsAction(selectedIds);
@@ -101,7 +101,7 @@ export function DepartmentsClient({
         <h1 className="text-2xl font-semibold">Departments</h1>
       </div>
       <div className="mt-4">
-        <DataTable
+        <DataTable<DepartmentWithUnpaidStats, unknown>
           columns={departmentColumns}
           data={initialDepartments}
           isLoading={false}

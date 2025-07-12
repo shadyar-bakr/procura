@@ -24,6 +24,17 @@ export type EnrichedInvoice = Invoice & {
   department?: Department | null;
 };
 
+// Enriched types with unpaid invoice stats
+export type SupplierWithUnpaidStats = Supplier & {
+  unpaid_invoice_count: number;
+  unpaid_invoice_total: number;
+};
+
+export type DepartmentWithUnpaidStats = Department & {
+  unpaid_invoice_count: number;
+  unpaid_invoice_total: number;
+};
+
 // Use DB-generated types for inserts/updates
 export type DepartmentInsert = TablesInsert<"departments">;
 export type DepartmentUpdate = TablesUpdate<"departments">;
