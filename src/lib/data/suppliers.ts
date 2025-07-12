@@ -4,6 +4,7 @@ import {
   SupplierInsert,
   SupplierUpdate,
   SupplierWithUnpaidStats,
+  InvoiceData,
 } from "@/types";
 
 export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
@@ -22,16 +23,17 @@ export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
 
   // Aggregate unpaid invoices for each supplier
   return (data || []).map((supplier) => {
-    const invoices = (supplier as any).invoices || [];
+    const invoices =
+      (supplier as Supplier & { invoices: InvoiceData[] }).invoices || [];
     const unpaidInvoices = invoices.filter(
-      (invoice: any) => invoice.status === "unpaid"
+      (invoice: InvoiceData) => invoice.status === "unpaid"
     );
 
     return {
       ...supplier,
       unpaid_invoice_count: unpaidInvoices.length,
       unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum: number, invoice: any) => sum + (invoice.amount || 0),
+        (sum: number, invoice: InvoiceData) => sum + (invoice.amount || 0),
         0
       ),
     } as SupplierWithUnpaidStats;

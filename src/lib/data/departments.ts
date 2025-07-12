@@ -4,6 +4,7 @@ import {
   DepartmentInsert,
   DepartmentUpdate,
   DepartmentWithUnpaidStats,
+  InvoiceData,
 } from "@/types";
 
 export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
@@ -22,16 +23,17 @@ export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
 
   // Aggregate unpaid invoices for each department
   return (data || []).map((department) => {
-    const invoices = (department as any).invoices || [];
+    const invoices =
+      (department as Department & { invoices: InvoiceData[] }).invoices || [];
     const unpaidInvoices = invoices.filter(
-      (invoice: any) => invoice.status === "unpaid"
+      (invoice: InvoiceData) => invoice.status === "unpaid"
     );
 
     return {
       ...department,
       unpaid_invoice_count: unpaidInvoices.length,
       unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum: number, invoice: any) => sum + (invoice.amount || 0),
+        (sum: number, invoice: InvoiceData) => sum + (invoice.amount || 0),
         0
       ),
     } as DepartmentWithUnpaidStats;

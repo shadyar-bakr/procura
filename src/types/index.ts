@@ -35,6 +35,11 @@ export type DepartmentWithUnpaidStats = Department & {
   unpaid_invoice_total: number;
 };
 
+export interface InvoiceData {
+  status: string;
+  amount: number | null;
+}
+
 // Use DB-generated types for inserts/updates
 export type DepartmentInsert = TablesInsert<"departments">;
 export type DepartmentUpdate = TablesUpdate<"departments">;
