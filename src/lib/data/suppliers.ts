@@ -4,12 +4,13 @@ import {
   SupplierInsert,
   SupplierUpdate,
   SupplierWithUnpaidStats,
+  InvoiceData,
 } from "@/types";
+import { calculateUnpaidInvoiceStats } from "@/lib/utils";
 
 export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
   const supabase = await createClient();
 
-  // Fetch suppliers with their unpaid invoices (status = 'unpaid')
   const { data, error } = await supabase
     .from("suppliers")
     .select(`*, invoices:invoices!invoices_supplier_id_fkey(status, amount)`)
@@ -20,20 +21,36 @@ export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
     throw new Error("Failed to fetch suppliers");
   }
 
-  // Aggregate unpaid invoices for each supplier
-  return (data || []).map((supplier) => {
-    const invoices = (supplier as any).invoices || [];
-    const unpaidInvoices = invoices.filter(
-      (invoice: any) => invoice.status === "unpaid"
-    );
+  type RawInvoiceFromSupabase = {
+    status: string | null;
+    amount: number;
+  };
+
+  type RawSupplierFromSupabase = Supplier & {
+    invoices?: RawInvoiceFromSupabase[];
+  };
+
+  return (data || []).map((supplier: RawSupplierFromSupabase) => {
+    const rawInvoices = supplier.invoices || [];
+
+    const processedInvoices: InvoiceData[] = rawInvoices
+      .filter(
+        (
+          inv
+        ): inv is RawInvoiceFromSupabase & { status: InvoiceData["status"] } =>
+          inv.status !== null &&
+          ["unpaid", "paid", "partial", "cancelled"].includes(inv.status)
+      )
+      .map((inv) => ({
+        status: inv.status,
+        amount: inv.amount,
+      }));
+
+    const stats = calculateUnpaidInvoiceStats(processedInvoices);
 
     return {
       ...supplier,
-      unpaid_invoice_count: unpaidInvoices.length,
-      unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum: number, invoice: any) => sum + (invoice.amount || 0),
-        0
-      ),
+      ...stats,
     } as SupplierWithUnpaidStats;
   });
 }

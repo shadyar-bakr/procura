@@ -22,3 +22,18 @@ export const formatCurrency = (amount: number, currency: "IQD" | "USD") => {
 
   return new Intl.NumberFormat("en-US", options).format(amount);
 };
+
+import { InvoiceData } from "@/types";
+
+export const calculateUnpaidInvoiceStats = (invoices: InvoiceData[]) => {
+  const unpaidInvoices = invoices.filter(
+    (invoice) => invoice.status === "unpaid"
+  );
+  return {
+    unpaid_invoice_count: unpaidInvoices.length,
+    unpaid_invoice_total: unpaidInvoices.reduce(
+      (sum, invoice) => sum + (invoice.amount ?? 0),
+      0
+    ),
+  };
+};
