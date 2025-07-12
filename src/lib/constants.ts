@@ -1,6 +1,6 @@
 export const INVOICE_STATUS = {
-  PAID: "Paid",
-  UNPAID: "not-paid",
+  PAID: "paid",
+  UNPAID: "unpaid",
   PARTIAL: "partial",
   CANCELLED: "cancelled",
 } as const;
