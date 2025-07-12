@@ -3,20 +3,24 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { loginSchema, signupSchema } from "@/types/schemas";
+import { loginSchema } from "@/types/schemas";
+import { validateAndExtract } from "@/lib/utils";
+import { cache } from "react";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
-  const parsed = loginSchema.safeParse(Object.fromEntries(formData.entries()));
+  const validatedFields = validateAndExtract(loginSchema, formData);
 
-  if (!parsed.success) {
-    const errorMessages = parsed.error.issues
-      .map((issue) => issue.message)
+  if (!validatedFields.success) {
+    const errorMessages = Object.values(validatedFields.errors)
+      .flat()
       .join(", ");
     return redirect(`/login?message=${encodeURIComponent(errorMessages)}`);
   }
 
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { error } = await supabase.auth.signInWithPassword(
+    validatedFields.data
+  );
 
   if (error) {
     return redirect(`/login?message=${encodeURIComponent(error.message)}`);
@@ -29,13 +33,14 @@ export async function login(formData: FormData) {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  revalidatePath("/"); // Revalidate the root path after sign out
   redirect("/login");
 }
 
-export async function getUser() {
+export const getUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});

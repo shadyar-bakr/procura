@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   Department,
@@ -6,54 +7,47 @@ import {
   DepartmentWithUnpaidStats,
   InvoiceData,
 } from "@/types";
-import { calculateUnpaidInvoiceStats } from "@/lib/utils";
+import { calculateUnpaidInvoiceStats, processRawInvoices } from "@/lib/utils";
 
-export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
-  const supabase = await createClient();
+export const getDepartments = cache(
+  async (): Promise<DepartmentWithUnpaidStats[]> => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("departments")
-    .select(`*, invoices:invoices!invoices_department_id_fkey(status, amount)`)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching departments:", error);
-    throw new Error("Failed to fetch departments");
-  }
-
-  type RawInvoiceFromSupabase = {
-    status: string | null;
-    amount: number;
-  };
-
-  type RawDepartmentFromSupabase = Department & {
-    invoices?: RawInvoiceFromSupabase[];
-  };
-
-  return (data || []).map((department: RawDepartmentFromSupabase) => {
-    const rawInvoices = department.invoices || [];
-
-    const processedInvoices: InvoiceData[] = rawInvoices
-      .filter(
-        (
-          inv
-        ): inv is RawInvoiceFromSupabase & { status: InvoiceData["status"] } =>
-          inv.status !== null &&
-          ["unpaid", "paid", "partial", "cancelled"].includes(inv.status)
+    const { data, error } = await supabase
+      .from("departments")
+      .select(
+        `*, invoices:invoices!invoices_department_id_fkey(status, amount)`
       )
-      .map((inv) => ({
-        status: inv.status,
-        amount: inv.amount,
-      }));
+      .order("created_at", { ascending: false });
 
-    const stats = calculateUnpaidInvoiceStats(processedInvoices);
+    if (error) {
+      console.error("Error fetching departments:", error);
+      throw new Error("Failed to fetch departments");
+    }
 
-    return {
-      ...department,
-      ...stats,
-    } as DepartmentWithUnpaidStats;
-  });
-}
+    type RawInvoiceFromSupabase = {
+      status: string | null;
+      amount: number;
+    };
+
+    type RawDepartmentFromSupabase = Department & {
+      invoices?: RawInvoiceFromSupabase[];
+    };
+
+    return (data || []).map((department: RawDepartmentFromSupabase) => {
+      const rawInvoices = department.invoices || [];
+
+      const processedInvoices: InvoiceData[] = processRawInvoices(rawInvoices);
+
+      const stats = calculateUnpaidInvoiceStats(processedInvoices);
+
+      return {
+        ...department,
+        ...stats,
+      } as DepartmentWithUnpaidStats;
+    });
+  }
+);
 
 export async function createDepartment(
   department: DepartmentInsert

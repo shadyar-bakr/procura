@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   Supplier,
@@ -6,54 +7,45 @@ import {
   SupplierWithUnpaidStats,
   InvoiceData,
 } from "@/types";
-import { calculateUnpaidInvoiceStats } from "@/lib/utils";
+import { calculateUnpaidInvoiceStats, processRawInvoices } from "@/lib/utils";
 
-export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
-  const supabase = await createClient();
+export const getSuppliers = cache(
+  async (): Promise<SupplierWithUnpaidStats[]> => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("suppliers")
-    .select(`*, invoices:invoices!invoices_supplier_id_fkey(status, amount)`)
-    .order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("suppliers")
+      .select(`*, invoices:invoices!invoices_supplier_id_fkey(status, amount)`)
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching suppliers:", error);
-    throw new Error("Failed to fetch suppliers");
+    if (error) {
+      console.error("Error fetching suppliers:", error);
+      throw new Error("Failed to fetch suppliers");
+    }
+
+    type RawInvoiceFromSupabase = {
+      status: string | null;
+      amount: number;
+    };
+
+    type RawSupplierFromSupabase = Supplier & {
+      invoices?: RawInvoiceFromSupabase[];
+    };
+
+    return (data || []).map((supplier: RawSupplierFromSupabase) => {
+      const rawInvoices = supplier.invoices || [];
+
+      const processedInvoices: InvoiceData[] = processRawInvoices(rawInvoices);
+
+      const stats = calculateUnpaidInvoiceStats(processedInvoices);
+
+      return {
+        ...supplier,
+        ...stats,
+      } as SupplierWithUnpaidStats;
+    });
   }
-
-  type RawInvoiceFromSupabase = {
-    status: string | null;
-    amount: number;
-  };
-
-  type RawSupplierFromSupabase = Supplier & {
-    invoices?: RawInvoiceFromSupabase[];
-  };
-
-  return (data || []).map((supplier: RawSupplierFromSupabase) => {
-    const rawInvoices = supplier.invoices || [];
-
-    const processedInvoices: InvoiceData[] = rawInvoices
-      .filter(
-        (
-          inv
-        ): inv is RawInvoiceFromSupabase & { status: InvoiceData["status"] } =>
-          inv.status !== null &&
-          ["unpaid", "paid", "partial", "cancelled"].includes(inv.status)
-      )
-      .map((inv) => ({
-        status: inv.status,
-        amount: inv.amount,
-      }));
-
-    const stats = calculateUnpaidInvoiceStats(processedInvoices);
-
-    return {
-      ...supplier,
-      ...stats,
-    } as SupplierWithUnpaidStats;
-  });
-}
+);
 
 export async function createSupplier(
   supplier: SupplierInsert

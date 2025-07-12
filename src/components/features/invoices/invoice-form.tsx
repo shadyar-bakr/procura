@@ -28,6 +28,7 @@ import {
   InvoiceFormValues,
 } from "@/types";
 import { invoiceSchema } from "@/types/schemas";
+import { CURRENCY, INVOICE_STATUS, INVOICE_STATUS_LIST } from "@/lib/constants";
 
 interface InvoiceFormProps {
   invoice?: EnrichedInvoice | null;
@@ -49,8 +50,9 @@ export function InvoiceForm({
     amount: invoice?.amount || 0,
     discount_amount: invoice?.discount_amount ?? null,
     tax_amount: invoice?.tax_amount ?? null,
-    currency: "IQD",
-    status: (invoice?.status as InvoiceFormValues["status"]) ?? "unpaid",
+    currency: CURRENCY,
+    status:
+      (invoice?.status as InvoiceFormValues["status"]) ?? INVOICE_STATUS.UNPAID,
     notes: invoice?.notes ?? null,
     supplier_id: invoice?.supplier_id ?? null,
     department_id: invoice?.department_id ?? null,
@@ -107,10 +109,11 @@ export function InvoiceForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="unpaid">Unpaid</SelectItem>
-                          <SelectItem value="paid">Paid</SelectItem>
-                          <SelectItem value="partial">Partial</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          {INVOICE_STATUS_LIST.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

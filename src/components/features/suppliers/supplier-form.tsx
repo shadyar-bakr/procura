@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Supplier, SupplierFormValues } from "@/types/index";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { supplierSchema } from "@/types/schemas";
@@ -28,48 +27,18 @@ export function SupplierForm({ supplier, onSubmit }: SupplierFormProps) {
   const form = useForm<SupplierFormValues>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
-      name: "",
-      address: null,
-      contact_person: null,
-      phone: null,
-      email: null,
-      tax_id: null,
-      notes: null,
+      name: supplier?.name || "",
+      address: supplier?.address ?? null,
+      contact_person: supplier?.contact_person ?? null,
+      phone: supplier?.phone ?? null,
+      email: supplier?.email ?? null,
+      tax_id: supplier?.tax_id ?? null,
+      notes: supplier?.notes ?? null,
       id: supplier?.id,
       created_at: supplier?.created_at ? new Date(supplier.created_at) : null,
       updated_at: supplier?.updated_at ? new Date(supplier.updated_at) : null,
     },
   });
-
-  useEffect(() => {
-    if (supplier) {
-      form.reset({
-        name: supplier.name,
-        address: supplier.address ?? null,
-        contact_person: supplier.contact_person ?? null,
-        phone: supplier.phone ?? null,
-        email: supplier.email ?? null,
-        tax_id: supplier.tax_id ?? null,
-        notes: supplier.notes ?? null,
-        id: supplier.id,
-        created_at: supplier.created_at ? new Date(supplier.created_at) : null,
-        updated_at: supplier.updated_at ? new Date(supplier.updated_at) : null,
-      });
-    } else {
-      form.reset({
-        name: "",
-        address: null,
-        contact_person: null,
-        phone: null,
-        email: null,
-        tax_id: null,
-        notes: null,
-        id: undefined,
-        created_at: null,
-        updated_at: null,
-      });
-    }
-  }, [supplier, form]);
 
   return (
     <Form {...form}>

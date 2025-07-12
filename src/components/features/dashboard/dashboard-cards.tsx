@@ -9,6 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { CURRENCY } from "@/lib/constants";
 
 type DashboardCardProps = {
   totalSuppliers: number;
@@ -71,9 +72,9 @@ export function DashboardCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {formatCurrency(paidInvoicesAmount, "IQD")}
+            {formatCurrency(paidInvoicesAmount, CURRENCY)}
           </div>
-          {renderComparison(paidInvoicesLastMonth, ` in last 30 days`)}
+          {renderComparison(paidInvoicesLastMonth, `invoices in last 30 days`)}
         </CardContent>
       </Card>
       <Card>
@@ -83,9 +84,12 @@ export function DashboardCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {formatCurrency(unpaidInvoicesAmount, "IQD")}
+            {formatCurrency(unpaidInvoicesAmount, CURRENCY)}
           </div>
-          {renderComparison(unpaidInvoicesLastMonth, `in last 30 days`)}
+          {renderComparison(
+            unpaidInvoicesLastMonth,
+            `invoices in last 30 days`
+          )}
         </CardContent>
       </Card>
     </div>

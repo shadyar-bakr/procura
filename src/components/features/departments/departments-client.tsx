@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FormModal } from "@/components/shared/form-modal";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { handleAction } from "@/lib/utils";
 
 interface DepartmentsClientProps {
   initialDepartments: DepartmentWithUnpaidStats[];
@@ -54,19 +55,9 @@ export function DepartmentsClient({
   };
 
   const handleAddDepartment = async (data: DepartmentFormValues) => {
-    const result = await createDepartmentAction(data);
-    if (result.success) {
-      toast.success(result.message);
+    const success = await handleAction(createDepartmentAction, data, false);
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
   };
 
@@ -74,19 +65,14 @@ export function DepartmentsClient({
     id: string,
     data: DepartmentFormValues
   ) => {
-    const result = await updateDepartmentAction(parseInt(id), data);
-    if (result.success) {
-      toast.success(result.message);
+    const success = await handleAction(
+      (values) =>
+        updateDepartmentAction(parseInt(id), values as DepartmentFormValues),
+      data,
+      false
+    );
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
   };
 

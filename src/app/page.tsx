@@ -6,6 +6,7 @@ import {
   getTopDepartmentsData,
 } from "@/lib/data/dashboard";
 import { PageError } from "@/components/shared/page-error";
+import { generateChartConfig } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -21,25 +22,9 @@ export default async function Home() {
       ]);
 
     // Generate chart configs
-    const topSuppliersConfig = Object.fromEntries(
-      topSuppliersData.map((supplier) => [
-        supplier.name,
-        {
-          label: supplier.name,
-          color: supplier.fill,
-        },
-      ])
-    );
+    const topSuppliersConfig = generateChartConfig(topSuppliersData);
 
-    const topDepartmentsConfig = Object.fromEntries(
-      topDepartmentsData.map((dept) => [
-        dept.name,
-        {
-          label: dept.name,
-          color: dept.fill,
-        },
-      ])
-    );
+    const topDepartmentsConfig = generateChartConfig(topDepartmentsData);
 
     return (
       <DashboardClient

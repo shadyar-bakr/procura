@@ -16,6 +16,7 @@ import { SupplierForm } from "@/components/features/suppliers/supplier-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { handleAction } from "@/lib/utils";
 
 interface SuppliersClientProps {
   initialSuppliers: SupplierWithUnpaidStats[];
@@ -52,36 +53,21 @@ export function SuppliersClient({ initialSuppliers }: SuppliersClientProps) {
   };
 
   const handleAddSupplier = async (data: SupplierFormValues) => {
-    const result = await createSupplierAction(data);
-    if (result.success) {
-      toast.success(result.message);
+    const success = await handleAction(createSupplierAction, data, false);
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
   };
 
   const handleEditSupplier = async (id: string, data: SupplierFormValues) => {
-    const result = await updateSupplierAction(parseInt(id), data);
-    if (result.success) {
-      toast.success(result.message);
+    const success = await handleAction(
+      (values) =>
+        updateSupplierAction(parseInt(id), values as SupplierFormValues),
+      data,
+      false
+    );
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
   };
 

@@ -16,6 +16,7 @@ import {
 } from "@/types";
 import { handleActionError } from "@/lib/action-handler";
 import { supplierSchema } from "@/types/schemas";
+import { validateAndExtract } from "@/lib/utils";
 
 const updateSupplierSchema = supplierSchema.partial();
 
@@ -23,25 +24,25 @@ export async function createSupplierAction(
   values: SupplierFormValues
 ): Promise<ActionResponse<Supplier>> {
   try {
-    const parsed = supplierSchema.safeParse(values);
+    const validatedFields = validateAndExtract(supplierSchema, values);
 
-    if (!parsed.success) {
+    if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: parsed.error.flatten().fieldErrors,
+        errors: validatedFields.errors,
       };
     }
 
     // Only pass DB fields
     const insertData: SupplierInsert = {
-      name: parsed.data.name,
-      address: parsed.data.address || null,
-      contact_person: parsed.data.contact_person || null,
-      email: parsed.data.email || null,
-      phone: parsed.data.phone || null,
-      tax_id: parsed.data.tax_id || null,
-      notes: parsed.data.notes || null,
+      name: validatedFields.data.name,
+      address: validatedFields.data.address || null,
+      contact_person: validatedFields.data.contact_person || null,
+      email: validatedFields.data.email || null,
+      phone: validatedFields.data.phone || null,
+      tax_id: validatedFields.data.tax_id || null,
+      notes: validatedFields.data.notes || null,
     };
 
     const data = await createSupplier(insertData);
@@ -62,25 +63,25 @@ export async function updateSupplierAction(
   values: SupplierFormValues
 ): Promise<ActionResponse<Supplier>> {
   try {
-    const parsed = updateSupplierSchema.safeParse(values);
+    const validatedFields = validateAndExtract(updateSupplierSchema, values);
 
-    if (!parsed.success) {
+    if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: parsed.error.flatten().fieldErrors,
+        errors: validatedFields.errors,
       };
     }
 
     // Only pass DB fields
     const updateData: SupplierUpdate = {
-      name: parsed.data.name,
-      address: parsed.data.address || null,
-      contact_person: parsed.data.contact_person || null,
-      email: parsed.data.email || null,
-      phone: parsed.data.phone || null,
-      tax_id: parsed.data.tax_id || null,
-      notes: parsed.data.notes || null,
+      name: validatedFields.data.name,
+      address: validatedFields.data.address || null,
+      contact_person: validatedFields.data.contact_person || null,
+      email: validatedFields.data.email || null,
+      phone: validatedFields.data.phone || null,
+      tax_id: validatedFields.data.tax_id || null,
+      notes: validatedFields.data.notes || null,
     };
 
     const data = await updateSupplier(id, updateData);

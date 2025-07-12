@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Department, DepartmentFormValues } from "@/types/index";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { departmentSchema } from "@/types/schemas";
@@ -28,24 +27,10 @@ export function DepartmentForm({ department, onSubmit }: DepartmentFormProps) {
   const form = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: department?.name || "",
+      description: department?.description || "",
     },
   });
-
-  useEffect(() => {
-    if (department) {
-      form.reset({
-        name: department.name,
-        description: department.description || "",
-      });
-    } else {
-      form.reset({
-        name: "",
-        description: "",
-      });
-    }
-  }, [department, form]);
 
   return (
     <Form {...form}>

@@ -17,20 +17,19 @@ import {
 import { handleActionError } from "@/lib/action-handler";
 import { invoiceSchema } from "@/types/schemas";
 import { payInvoiceSchema } from "@/types/schemas";
+import { validateAndExtract } from "@/lib/utils";
 
 export async function createInvoiceAction(
   formData: FormData
 ): Promise<ActionResponse<Invoice>> {
   try {
-    const validatedFields = invoiceSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const validatedFields = validateAndExtract(invoiceSchema, formData);
 
     if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: validatedFields.error.flatten().fieldErrors,
+        errors: validatedFields.errors,
       };
     }
 
@@ -67,15 +66,13 @@ export async function updateInvoiceAction(
   formData: FormData
 ): Promise<ActionResponse<Invoice>> {
   try {
-    const validatedFields = invoiceSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const validatedFields = validateAndExtract(invoiceSchema, formData);
 
     if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: validatedFields.error.flatten().fieldErrors,
+        errors: validatedFields.errors,
       };
     }
 
@@ -136,17 +133,17 @@ export async function payInvoiceAction(
   data: PayInvoiceFormValues
 ): Promise<ActionResponse<Invoice>> {
   try {
-    const parsed = payInvoiceSchema.safeParse(data);
+    const validatedFields = validateAndExtract(payInvoiceSchema, data);
 
-    if (!parsed.success) {
+    if (!validatedFields.success) {
       return {
         success: false,
         message: "Invalid form data",
-        errors: parsed.error.flatten().fieldErrors,
+        errors: validatedFields.errors,
       };
     }
 
-    const paidData = await payInvoice(id, parsed.data.payment_date);
+    const paidData = await payInvoice(id, validatedFields.data.payment_date);
     revalidatePath("/invoices");
     revalidatePath("/"); // Revalidate dashboard
 

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   Invoice,
@@ -7,26 +8,28 @@ import {
 } from "@/types";
 import { QueryData } from "@supabase/supabase-js";
 
-export async function getEnrichedInvoices(): Promise<EnrichedInvoice[]> {
-  const supabase = await createClient();
+export const getEnrichedInvoices = cache(
+  async (): Promise<EnrichedInvoice[]> => {
+    const supabase = await createClient();
 
-  const enrichedInvoicesQuery = supabase.from("invoices").select(`
+    const enrichedInvoicesQuery = supabase.from("invoices").select(`
     *,
     supplier:suppliers (*),
     department:departments (*)
   `);
 
-  type EnrichedInvoices = QueryData<typeof enrichedInvoicesQuery>;
+    type EnrichedInvoices = QueryData<typeof enrichedInvoicesQuery>;
 
-  const { data, error } = await enrichedInvoicesQuery;
+    const { data, error } = await enrichedInvoicesQuery;
 
-  if (error) {
-    console.error("Error fetching invoices:", error);
-    throw new Error("Failed to fetch invoices");
+    if (error) {
+      console.error("Error fetching invoices:", error);
+      throw new Error("Failed to fetch invoices");
+    }
+
+    return (data as EnrichedInvoices) || [];
   }
-
-  return (data as EnrichedInvoices) || [];
-}
+);
 
 export async function createInvoice(invoice: InvoiceInsert): Promise<Invoice> {
   const supabase = await createClient();

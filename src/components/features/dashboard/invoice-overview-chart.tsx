@@ -8,6 +8,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { CURRENCY } from "@/lib/constants";
 
 type InvoiceOverviewChartProps = {
   data: {
@@ -46,7 +48,9 @@ export function InvoiceOverviewChart({
                 fontSize={12}
               />
               <YAxis
-                tickFormatter={(value) => `$${Number(value) / 1000}k`}
+                tickFormatter={(value) =>
+                  formatCurrency(Number(value), CURRENCY)
+                }
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}

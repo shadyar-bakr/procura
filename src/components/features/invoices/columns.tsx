@@ -78,7 +78,6 @@ export const getColumns = (
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
-      const currency = row.original.currency;
       return (
         <div className="font-medium">{formatCurrency(amount, CURRENCY)}</div>
       );
@@ -91,7 +90,6 @@ export const getColumns = (
     ),
     cell: ({ row }) => {
       const discount = parseFloat(row.getValue("discount_amount") || "0");
-      const currency = row.original.currency;
       return (
         <div className="font-medium">{formatCurrency(discount, CURRENCY)}</div>
       );
@@ -107,7 +105,6 @@ export const getColumns = (
       const discount = parseFloat(String(row.original.discount_amount ?? 0));
       const tax = parseFloat(String(row.original.tax_amount ?? 0));
       const total = amount - discount + tax;
-      const currency = row.original.currency;
       return (
         <div className="font-medium">{formatCurrency(total, CURRENCY)}</div>
       );

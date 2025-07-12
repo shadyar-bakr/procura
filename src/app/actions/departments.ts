@@ -15,19 +15,20 @@ import {
 } from "@/types";
 import { handleActionError } from "@/lib/action-handler";
 import { departmentSchema } from "@/types/schemas";
+import { validateAndExtract } from "@/lib/utils";
 
 const updateDepartmentSchema = departmentSchema.partial();
 
 export async function createDepartmentAction(
   values: DepartmentFormValues
 ): Promise<ActionResponse<Department>> {
-  const validatedFields = departmentSchema.safeParse(values);
+  const validatedFields = validateAndExtract(departmentSchema, values);
 
   if (!validatedFields.success) {
     return {
       success: false,
       message: "Validation failed.",
-      errors: validatedFields.error.flatten().fieldErrors,
+      errors: validatedFields.errors,
     };
   }
 
@@ -54,13 +55,13 @@ export async function updateDepartmentAction(
   id: number,
   values: DepartmentFormValues
 ): Promise<ActionResponse<Department>> {
-  const validatedFields = updateDepartmentSchema.safeParse(values);
+  const validatedFields = validateAndExtract(updateDepartmentSchema, values);
 
   if (!validatedFields.success) {
     return {
       success: false,
       message: "Validation failed",
-      errors: validatedFields.error.flatten().fieldErrors,
+      errors: validatedFields.errors,
     };
   }
 

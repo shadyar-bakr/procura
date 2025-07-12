@@ -15,6 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn, formatCurrency } from "@/lib/utils";
+import { CURRENCY } from "@/lib/constants";
 
 type BarChartProps = {
   title: string;
@@ -59,7 +60,7 @@ export function BarChart({ title, data, config, className }: BarChartProps) {
                 content={
                   <ChartTooltipContent
                     formatter={(value) =>
-                      formatCurrency(value as number, "IQD")
+                      formatCurrency(value as number, CURRENCY)
                     }
                     indicator="dot"
                   />

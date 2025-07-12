@@ -4,9 +4,9 @@ import {
   EnrichedInvoice,
   Department,
   Supplier,
-  InvoiceInsert,
   InvoiceUpdate,
   PayInvoiceFormValues,
+  InvoiceFormValues,
 } from "@/types";
 import { getColumns } from "@/components/features/invoices/columns";
 import DataTable from "@/components/shared/data-table";
@@ -24,6 +24,7 @@ import { InvoiceForm } from "@/components/features/invoices/invoice-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { handleAction } from "@/lib/utils";
 
 interface InvoicesClientProps {
   initialInvoices: EnrichedInvoice[];
@@ -77,64 +78,46 @@ export function InvoicesClient({
     }
   };
 
-  const handleAddInvoice = async (data: InvoiceInsert) => {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (value instanceof Date) {
-        formData.append(key, value.toISOString());
-      } else if (value !== null && value !== undefined) {
-        formData.append(key, String(value));
-      }
-    });
-
-    const result = await createInvoiceAction(formData);
-    if (result.success) {
-      toast.success(result.message);
+  const handleAddInvoice = async (data: InvoiceFormValues) => {
+    const success = await handleAction(createInvoiceAction, data, true);
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
   };
 
   const handleEditInvoice = async (id: string, data: InvoiceUpdate) => {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (value instanceof Date) {
-        formData.append(key, value.toISOString());
-      } else if (value !== null && value !== undefined) {
-        formData.append(key, String(value));
-      }
-    });
-
-    const result = await updateInvoiceAction(parseInt(id), formData);
-    if (result.success) {
-      toast.success(result.message);
+    const success = await handleAction(
+      (formData) => updateInvoiceAction(parseInt(id), formData),
+      data,
+      true
+    );
+    if (success) {
       router.refresh();
-    } else {
-      toast.error(result.message);
-      if (result.errors) {
-        Object.values(result.errors).forEach((error) => {
-          if (Array.isArray(error)) {
-            error.forEach((e) => toast.error(e));
-          }
-        });
-      }
     }
+  };
+
+  const handleAddInvoiceWrapper = (data: InvoiceFormValues) => {
+    // We intentionally don't await here as the parent component (FormModal) doesn't expect a promise.
+    // The side effects (toast, router.refresh) are handled internally.
+    handleAddInvoice(data);
+  };
+
+  const handleEditInvoiceWrapper = (id: string, data: InvoiceUpdate) => {
+    // Same as above, don't await.
+    handleEditInvoice(id, data);
+  };
+
+  const handlePayInvoiceWrapper = (id: string, data: PayInvoiceFormValues) => {
+    // Same as above, don't await.
+    handlePayInvoice(id, data);
   };
 
   const invoiceColumns = getColumns(
     suppliers,
     departments,
-    handleEditInvoice,
+    handleEditInvoiceWrapper,
     handleDeleteInvoice,
-    handlePayInvoice
+    handlePayInvoiceWrapper
   );
 
   return (
@@ -163,7 +146,7 @@ export function InvoicesClient({
             <FormModal
               title="Add New Invoice"
               description="Fill in the details below to add a new invoice."
-              onFormSubmit={handleAddInvoice}
+              onFormSubmit={handleAddInvoiceWrapper}
               trigger={
                 <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
