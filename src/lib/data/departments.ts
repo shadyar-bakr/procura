@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { Department, DepartmentInsert, DepartmentUpdate } from "@/types";
+import {
+  Department,
+  DepartmentInsert,
+  DepartmentUpdate,
+  DepartmentWithUnpaidStats,
+} from "@/types";
 
-export async function getDepartments(): Promise<
-  (Department & {
-    unpaid_invoice_count: number;
-    unpaid_invoice_total: number;
-  })[]
-> {
+export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
   const supabase = await createClient();
 
   // Fetch departments with their unpaid invoices (status = 'unpaid')
@@ -22,21 +22,19 @@ export async function getDepartments(): Promise<
 
   // Aggregate unpaid invoices for each department
   return (data || []).map((department) => {
-    const invoices =
-      (
-        department as Department & {
-          invoices?: { status: string; amount: number | null }[];
-        }
-      ).invoices || [];
-    const unpaidInvoices = invoices.filter((i) => i.status === "unpaid");
+    const invoices = (department as any).invoices || [];
+    const unpaidInvoices = invoices.filter(
+      (invoice: any) => invoice.status === "unpaid"
+    );
+
     return {
       ...department,
       unpaid_invoice_count: unpaidInvoices.length,
       unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum, i) => sum + (i.amount || 0),
+        (sum: number, invoice: any) => sum + (invoice.amount || 0),
         0
       ),
-    };
+    } as DepartmentWithUnpaidStats;
   });
 }
 

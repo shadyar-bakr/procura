@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { Supplier, SupplierInsert, SupplierUpdate } from "@/types";
+import {
+  Supplier,
+  SupplierInsert,
+  SupplierUpdate,
+  SupplierWithUnpaidStats,
+} from "@/types";
 
-export async function getSuppliers(): Promise<
-  (Supplier & { unpaid_invoice_count: number; unpaid_invoice_total: number })[]
-> {
+export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
   const supabase = await createClient();
 
   // Fetch suppliers with their unpaid invoices (status = 'unpaid')
@@ -19,21 +22,19 @@ export async function getSuppliers(): Promise<
 
   // Aggregate unpaid invoices for each supplier
   return (data || []).map((supplier) => {
-    const invoices =
-      (
-        supplier as Supplier & {
-          invoices?: { status: string; amount: number | null }[];
-        }
-      ).invoices || [];
-    const unpaidInvoices = invoices.filter((i) => i.status === "unpaid");
+    const invoices = (supplier as any).invoices || [];
+    const unpaidInvoices = invoices.filter(
+      (invoice: any) => invoice.status === "unpaid"
+    );
+
     return {
       ...supplier,
       unpaid_invoice_count: unpaidInvoices.length,
       unpaid_invoice_total: unpaidInvoices.reduce(
-        (sum, i) => sum + (i.amount || 0),
+        (sum: number, invoice: any) => sum + (invoice.amount || 0),
         0
       ),
-    };
+    } as SupplierWithUnpaidStats;
   });
 }
 

@@ -83,7 +83,11 @@ export const getColumns = (
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Unpaid Total" />
     ),
-    cell: ({ row }) => row.original.unpaid_invoice_total.toLocaleString(),
+    cell: ({ row }) =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(row.original.unpaid_invoice_total),
   },
   {
     id: "actions",
