@@ -73,7 +73,7 @@ export function DashboardCards({
           <div className="text-2xl font-bold">
             {formatCurrency(paidInvoicesAmount, "IQD")}
           </div>
-          {renderComparison(paidInvoicesLastMonth, ` invoices in last 30 days`)}
+          {renderComparison(paidInvoicesLastMonth, ` in last 30 days`)}
         </CardContent>
       </Card>
       <Card>
@@ -85,10 +85,7 @@ export function DashboardCards({
           <div className="text-2xl font-bold">
             {formatCurrency(unpaidInvoicesAmount, "IQD")}
           </div>
-          {renderComparison(
-            unpaidInvoicesLastMonth,
-            `invoices in last 30 days`
-          )}
+          {renderComparison(unpaidInvoicesLastMonth, `in last 30 days`)}
         </CardContent>
       </Card>
     </div>
