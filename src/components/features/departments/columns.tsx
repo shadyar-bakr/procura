@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { GenericCellAction } from "@/components/shared/cell-action";
 import { FormModal } from "@/components/shared/form-modal";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { formatCurrency } from "@/lib/utils";
+import { CURRENCY } from "@/lib/constants";
 
 export const getColumns = (
   onEdit: (id: string, data: DepartmentFormValues) => void,
@@ -84,10 +86,7 @@ export const getColumns = (
       <DataTableColumnHeader column={column} title="Unpaid Total" />
     ),
     cell: ({ row }) =>
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(row.original.unpaid_invoice_total),
+      formatCurrency(row.original.unpaid_invoice_total, CURRENCY),
   },
   {
     id: "actions",

@@ -18,6 +18,7 @@ import { FormModal } from "@/components/shared/form-modal";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { PayInvoiceForm } from "./pay-invoice-form";
 import { Badge } from "@/components/ui/badge";
+import { CURRENCY } from "@/lib/constants";
 
 export const getColumns = (
   suppliers: Supplier[],
@@ -79,9 +80,7 @@ export const getColumns = (
       const amount = parseFloat(row.getValue("amount"));
       const currency = row.original.currency;
       return (
-        <div className="font-medium">
-          {formatCurrency(amount, currency === "USD" ? "USD" : "IQD")}
-        </div>
+        <div className="font-medium">{formatCurrency(amount, CURRENCY)}</div>
       );
     },
   },
@@ -94,9 +93,7 @@ export const getColumns = (
       const discount = parseFloat(row.getValue("discount_amount") || "0");
       const currency = row.original.currency;
       return (
-        <div className="font-medium">
-          {formatCurrency(discount, currency === "USD" ? "USD" : "IQD")}
-        </div>
+        <div className="font-medium">{formatCurrency(discount, CURRENCY)}</div>
       );
     },
   },
@@ -112,9 +109,7 @@ export const getColumns = (
       const total = amount - discount + tax;
       const currency = row.original.currency;
       return (
-        <div className="font-medium">
-          {formatCurrency(total, currency === "USD" ? "USD" : "IQD")}
-        </div>
+        <div className="font-medium">{formatCurrency(total, CURRENCY)}</div>
       );
     },
   },

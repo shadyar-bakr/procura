@@ -32,7 +32,7 @@ export const invoiceSchema = z.object({
   id: z.coerce.number().optional(),
   invoice_number: z.string().min(1, { message: "Invoice number is required" }),
   amount: z.coerce.number().min(0, { message: "Amount must be positive" }),
-  currency: z.enum(["IQD", "USD"]).nullable().optional(),
+  currency: z.enum(["IQD"]).nullable().optional(),
   status: z
     .enum(["paid", "unpaid", "partial", "cancelled"])
     .nullable()

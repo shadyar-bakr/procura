@@ -6,6 +6,7 @@ import {
   supplierSchema,
 } from "./schemas";
 import { Tables, TablesInsert, TablesUpdate } from "./database.types";
+import { INVOICE_STATUS } from "@/lib/constants";
 
 // Base types from Supabase
 export type Department = Tables<"departments">;
@@ -36,7 +37,7 @@ export type DepartmentWithUnpaidStats = Department & {
 };
 
 export interface InvoiceData {
-  status: "unpaid" | "paid" | "partial" | "cancelled";
+  status: (typeof INVOICE_STATUS)[keyof typeof INVOICE_STATUS];
   amount: number | null;
 }
 

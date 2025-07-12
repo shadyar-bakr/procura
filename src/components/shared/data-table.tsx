@@ -202,7 +202,6 @@ export default function DataTable<TData, TValue>({
                 filterColumnPlaceholder ?? `Filter by ${filterColumn}...`
               }
               type="text"
-              aria-label={`Filter by ${filterColumn}`}
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
               <ListFilterIcon size={16} aria-hidden="true" />
@@ -380,17 +379,17 @@ export default function DataTable<TData, TValue>({
             Rows per page
           </Label>
           <Select
-            value={table.getState().pagination.pageSize.toString()}
+            value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-              <SelectValue placeholder="Select number of results" />
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent>
-              {[5, 10, 25, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={pageSize.toString()}>
+              {[10, 20, 30, 40, 50, 100].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
               ))}
