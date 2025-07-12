@@ -36,7 +36,7 @@ export type DepartmentWithUnpaidStats = Department & {
 };
 
 export interface InvoiceData {
-  status: string;
+  status: "unpaid" | "paid" | "partial" | "cancelled";
   amount: number | null;
 }
 
