@@ -7,6 +7,13 @@ import {
   InvoiceData,
 } from "@/types";
 
+/**
+ * Retrieves all suppliers along with their unpaid invoice statistics.
+ *
+ * Fetches suppliers from the database, including related invoices, and computes for each supplier the count and total amount of unpaid invoices.
+ *
+ * @returns An array of suppliers, each augmented with the number and total amount of unpaid invoices.
+ */
 export async function getSuppliers(): Promise<SupplierWithUnpaidStats[]> {
   const supabase = await createClient();
 

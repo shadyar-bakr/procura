@@ -7,6 +7,15 @@ import {
   InvoiceData,
 } from "@/types";
 
+/**
+ * Retrieves all departments with aggregated statistics for unpaid invoices.
+ *
+ * Each department includes the count and total amount of its unpaid invoices.
+ * Departments are ordered by creation date in descending order.
+ *
+ * @returns An array of departments, each extended with unpaid invoice count and total.
+ * @throws If fetching departments from the database fails.
+ */
 export async function getDepartments(): Promise<DepartmentWithUnpaidStats[]> {
   const supabase = await createClient();
 
